@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #SBATCH --job-name=corsica_wreck_eDNA
 #SBATCH --ntasks=1
 #SBATCH -p smp
@@ -14,19 +15,20 @@
 # Author: Pierre-Louis Stenger
 # Date: November 2025
 #
-# CORRECTION: Gestion des variables d'environnement bash pour HPC
+# Description:
+# Ce pipeline analyse 4 échantillons sedaDNA séquencés avec 2 recettes:
+# - Recipe1 (R1): recipes-ShortInsert (2x150bp) - séquençage standard
+# - Recipe2 (R2): recipes-v3.3.x-ShortInsert-SmallFragmentRecovery (2x150bp) - récupération fragments courts
+# - Combined (R1R2): Fusion des deux recettes pour maximiser la couverture
+#
+# Échantillons:
+# - 1121_sed8_rep1 (sed8, réplicat 1)
+# - 1122_sed8_rep2 (sed8, réplicat 2)
+# - 1129_sed6_rep1 (sed6, réplicat 1)
+# - 1130_sed6_rep2 (sed6, réplicat 2)
 ################################################################################
 
-# CORRECTION: Configuration bash pour environnement non-interactif
 set -euo pipefail
-export PS1='$ '  # Définir PS1 pour éviter l'erreur "variable sans liaison"
-
-# CORRECTION: Source bashrc de façon sécurisée
-if [[ -f ~/.bashrc ]]; then
-    set +u  # Temporairement désactiver 'unset variable' check
-    source ~/.bashrc
-    set -u  # Réactiver le check
-fi
 
 # Définition des chemins de base
 BASE_DIR="/home/plstenge/seda_DNA_Corsican_wreck_comparison"
@@ -50,39 +52,6 @@ echo "=========================================="
 echo "Pipeline sedaDNA - Corsica wreck"
 echo "Date de début: $(date)"
 echo "=========================================="
-
-################################################################################
-# FONCTION: Activation conda sécurisée
-################################################################################
-
-safe_conda_activate() {
-    local env_name=$1
-    echo "Activation de l'environnement conda: $env_name"
-    
-    # Chargement du module conda
-    module load conda/4.12.0 2>/dev/null || echo "Module conda déjà chargé"
-    
-    # Source bashrc seulement si nécessaire
-    if [[ ! $(type -t conda) == "function" ]]; then
-        set +u
-        source ~/.bashrc 2>/dev/null || true
-        set -u
-    fi
-    
-    # Activation de l'environnement
-    conda activate "$env_name" 2>/dev/null || {
-        echo "Erreur lors de l'activation de $env_name"
-        conda info --envs
-        exit 1
-    }
-    
-    echo "Environnement $env_name activé avec succès"
-}
-
-safe_conda_deactivate() {
-    conda deactivate 2>/dev/null || true
-    echo "Environnement conda désactivé"
-}
 
 ################################################################################
 # ÉTAPE 0: Création de l'arborescence et copie des données
@@ -109,37 +78,15 @@ mkdir -p "${BASE_DIR}/09_mpa_tables"
 # Copie des fichiers Recipe 1 (Standard ShortInsert)
 echo "Copie des fichiers Recipe1 (Standard ShortInsert)..."
 for sample in "${SAMPLES[@]}"; do
-    if [[ -f "${RECIPE1_DIR}/${sample}_R1.fastq.gz" ]]; then
-        cp "${RECIPE1_DIR}/${sample}_R1.fastq.gz" "${BASE_DIR}/01_raw_data/recipe1_standard/"
-        echo "  ✓ ${sample}_R1.fastq.gz copié"
-    else
-        echo "  ✗ ${sample}_R1.fastq.gz non trouvé"
-    fi
-    
-    if [[ -f "${RECIPE1_DIR}/${sample}_R2.fastq.gz" ]]; then
-        cp "${RECIPE1_DIR}/${sample}_R2.fastq.gz" "${BASE_DIR}/01_raw_data/recipe1_standard/"
-        echo "  ✓ ${sample}_R2.fastq.gz copié"
-    else
-        echo "  ✗ ${sample}_R2.fastq.gz non trouvé"
-    fi
+    cp "${RECIPE1_DIR}/${sample}_R1.fastq.gz" "${BASE_DIR}/01_raw_data/recipe1_standard/" 2>/dev/null || echo "Warning: ${sample} R1 not found in Recipe1"
+    cp "${RECIPE1_DIR}/${sample}_R2.fastq.gz" "${BASE_DIR}/01_raw_data/recipe1_standard/" 2>/dev/null || echo "Warning: ${sample} R2 not found in Recipe1"
 done
 
 # Copie des fichiers Recipe 2 (SmallFragmentRecovery)
 echo "Copie des fichiers Recipe2 (SmallFragmentRecovery)..."
 for sample in "${SAMPLES[@]}"; do
-    if [[ -f "${RECIPE2_DIR}/${sample}/${sample}_R1.fastq.gz" ]]; then
-        cp "${RECIPE2_DIR}/${sample}/${sample}_R1.fastq.gz" "${BASE_DIR}/01_raw_data/recipe2_smallfrag/"
-        echo "  ✓ ${sample}_R1.fastq.gz copié"
-    else
-        echo "  ✗ ${sample}_R1.fastq.gz non trouvé dans ${RECIPE2_DIR}/${sample}/"
-    fi
-    
-    if [[ -f "${RECIPE2_DIR}/${sample}/${sample}_R2.fastq.gz" ]]; then
-        cp "${RECIPE2_DIR}/${sample}/${sample}_R2.fastq.gz" "${BASE_DIR}/01_raw_data/recipe2_smallfrag/"
-        echo "  ✓ ${sample}_R2.fastq.gz copié"
-    else
-        echo "  ✗ ${sample}_R2.fastq.gz non trouvé dans ${RECIPE2_DIR}/${sample}/"
-    fi
+    cp "${RECIPE2_DIR}/${sample}/${sample}_R1.fastq.gz" "${BASE_DIR}/01_raw_data/recipe2_smallfrag/" 2>/dev/null || echo "Warning: ${sample} R1 not found in Recipe2"
+    cp "${RECIPE2_DIR}/${sample}/${sample}_R2.fastq.gz" "${BASE_DIR}/01_raw_data/recipe2_smallfrag/" 2>/dev/null || echo "Warning: ${sample} R2 not found in Recipe2"
 done
 
 # Création des fichiers combinés (Recipe1 + Recipe2)
@@ -150,20 +97,15 @@ for sample in "${SAMPLES[@]}"; do
     R1_RECIPE2="${BASE_DIR}/01_raw_data/recipe2_smallfrag/${sample}_R1.fastq.gz"
     R2_RECIPE2="${BASE_DIR}/01_raw_data/recipe2_smallfrag/${sample}_R2.fastq.gz"
     
-    # Fusion R1
+    # Vérification que les fichiers existent
     if [[ -f "$R1_RECIPE1" ]] && [[ -f "$R1_RECIPE2" ]]; then
         cat "$R1_RECIPE1" "$R1_RECIPE2" > "${BASE_DIR}/01_raw_data/combined_recipe1_recipe2/${sample}_R1.fastq.gz"
-        echo "  ✓ ${sample}_R1 combiné créé"
-    else
-        echo "  ✗ Impossible de créer ${sample}_R1 combiné"
+        echo "  → ${sample}_R1 combiné créé"
     fi
     
-    # Fusion R2
     if [[ -f "$R2_RECIPE1" ]] && [[ -f "$R2_RECIPE2" ]]; then
         cat "$R2_RECIPE1" "$R2_RECIPE2" > "${BASE_DIR}/01_raw_data/combined_recipe1_recipe2/${sample}_R2.fastq.gz"
-        echo "  ✓ ${sample}_R2 combiné créé"
-    else
-        echo "  ✗ Impossible de créer ${sample}_R2 combiné"
+        echo "  → ${sample}_R2 combiné créé"
     fi
 done
 
@@ -177,7 +119,9 @@ echo ""
 echo "=== ÉTAPE 1: Contrôle qualité (FastQC/MultiQC) ==="
 echo ""
 
-safe_conda_activate fastqc
+module load conda/4.12.0
+source ~/.bashrc
+conda activate fastqc
 
 # FastQC pour chaque type de recette
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -188,24 +132,22 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
     
     for FILE in "${RECIPE_DIR}"/*.fastq.gz; do
         if [[ -f "$FILE" ]]; then
-            fastqc "$FILE" -o "$OUTPUT_DIR" -t 4 --quiet
-            echo "  ✓ $(basename "$FILE") analysé"
+            fastqc "$FILE" -o "$OUTPUT_DIR" -t 4
         fi
     done
 done
 
-safe_conda_deactivate
+conda deactivate
 
 # MultiQC pour résumer tous les rapports
-safe_conda_activate multiqc
+conda activate multiqc
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
     echo "MultiQC pour ${recipe_type}..."
     OUTPUT_DIR="${BASE_DIR}/02_quality_check/${recipe_type}"
-    cd "$OUTPUT_DIR" || continue
-    multiqc . -n "multiqc_${recipe_type}.html" --quiet
-    echo "  ✓ Rapport MultiQC généré: multiqc_${recipe_type}.html"
+    cd "$OUTPUT_DIR"
+    multiqc . -n "multiqc_${recipe_type}.html"
 done
-safe_conda_deactivate
+conda deactivate
 
 echo "Contrôle qualité terminé."
 
@@ -217,22 +159,23 @@ echo ""
 echo "=== ÉTAPE 2: Filtrage et trimming (BBDuk) ==="
 echo ""
 
-# BBDuk ne nécessite pas conda, utilisation directe
+module load conda/4.12.0
+source ~/.bashrc
+conda activate bbduk
+
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
     echo "BBDuk pour ${recipe_type}..."
     INPUT_DIR="${BASE_DIR}/01_raw_data/${recipe_type}"
     OUTPUT_DIR="${BASE_DIR}/03_bbduk/${recipe_type}"
     mkdir -p "$OUTPUT_DIR"
     
-    cd "$INPUT_DIR" || continue
+    cd "$INPUT_DIR"
     
     for r1_file in *_R1.fastq.gz; do
-        if [[ ! -f "$r1_file" ]]; then continue; fi
-        
         r2_file="${r1_file/_R1/_R2}"
         
         if [[ ! -f "$r2_file" ]]; then
-            echo "  ✗ Fichier R2 manquant pour $r1_file"
+            echo "ERREUR: Fichier R2 manquant pour $r1_file" >&2
             continue
         fi
         
@@ -255,11 +198,11 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
             minlen=25 \
             qtrim=r \
             trimq=20 \
-            stats="${OUTPUT_DIR}/${base_name}_bbduk_stats.txt" 2>/dev/null
-        
-        echo "  ✓ ${base_name} traité avec succès"
+            stats="${OUTPUT_DIR}/${base_name}_bbduk_stats.txt"
     done
 done
+
+conda deactivate
 
 echo "Filtrage BBDuk terminé."
 
@@ -271,9 +214,11 @@ echo ""
 echo "=== ÉTAPE 3: Déduplication (FastUniq) ==="
 echo ""
 
-safe_conda_activate fastuniq
+module load conda/4.12.0
+source ~/.bashrc
+conda activate fastuniq
 
-TMP="${BASE_DIR}/tmp_fastuniq"
+TMP="/tmp/fastuniq_corsica_tmp"
 mkdir -p "$TMP"
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -285,10 +230,8 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
     cd "$INPUT_DIR" || continue
     
     for R1_gz in clean_*_R1.fastq.gz; do
-        if [[ ! -f "$R1_gz" ]]; then continue; fi
-        
-        base=$(echo "$R1_gz" | sed 's/clean_//' | sed 's/_R1\.fastq\.gz//')
-        R2_gz="clean_${base}_R2.fastq.gz"
+        base=$(echo "$R1_gz" | sed 's/_R1\.fastq\.gz//')
+        R2_gz="${base}_R2.fastq.gz"
         
         if [[ -f "$R2_gz" ]]; then
             echo "  → Traitement de ${base}..."
@@ -297,23 +240,24 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
             R2_tmp="${TMP}/${base}_R2.fastq"
             listfile="${TMP}/${base}.list"
             
-            zcat "$R1_gz" > "$R1_tmp"
-            zcat "$R2_gz" > "$R2_tmp"
+            zcat "$INPUT_DIR/$R1_gz" > "$R1_tmp"
+            zcat "$INPUT_DIR/$R2_gz" > "$R2_tmp"
             
             echo -e "${R1_tmp}\n${R2_tmp}" > "$listfile"
             
             fastuniq -i "$listfile" -t q \
                 -o "${OUTPUT_DIR}/${base}_dedup_R1.fastq" \
-                -p "${OUTPUT_DIR}/${base}_dedup_R2.fastq" 2>/dev/null
+                -p "${OUTPUT_DIR}/${base}_dedup_R2.fastq"
             
             rm -f "$R1_tmp" "$R2_tmp" "$listfile"
-            echo "  ✓ ${base} dédupliqué"
+        else
+            echo "ATTENTION: fichier R2 manquant pour $base"
         fi
     done
 done
 
 rm -rf "$TMP"
-safe_conda_deactivate
+conda deactivate
 
 echo "Déduplication FastUniq terminée."
 
@@ -325,31 +269,35 @@ echo ""
 echo "=== ÉTAPE 4: Clumpify (déduplication optique) ==="
 echo ""
 
+module load conda/4.12.0
+source ~/.bashrc
+conda activate bbduk
+
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
     echo "Clumpify pour ${recipe_type}..."
     INPUT_DIR="${BASE_DIR}/04_fastuniq/${recipe_type}"
     OUTPUT_DIR="${BASE_DIR}/05_clumpify/${recipe_type}"
     mkdir -p "$OUTPUT_DIR"
     
-    for R1 in "${INPUT_DIR}"/*_dedup_R1.fastq; do
-        if [[ ! -f "$R1" ]]; then continue; fi
-        
+    for R1 in "${INPUT_DIR}"/*_R1.fastq; do
         R2="${R1/_R1.fastq/_R2.fastq}"
         
         if [[ -f "$R2" ]]; then
-            base=$(basename "$R1" _dedup_R1.fastq)
+            base=$(basename "$R1" _R1.fastq)
             echo "  → Traitement de ${base}..."
             
             $CLUMPIFY \
                 in="$R1" in2="$R2" \
                 out="${OUTPUT_DIR}/${base}_clumpify_R1.fastq.gz" \
                 out2="${OUTPUT_DIR}/${base}_clumpify_R2.fastq.gz" \
-                dedupe=t 2>/dev/null
-            
-            echo "  ✓ ${base} clumpifié"
+                dedupe=t
+        else
+            echo "Fichier R2 manquant pour $R1, ignoré."
         fi
     done
 done
+
+conda deactivate
 
 echo "Clumpify terminé."
 
@@ -361,20 +309,21 @@ echo ""
 echo "=== ÉTAPE 5: Fastp (merging et QC final) ==="
 echo ""
 
-safe_conda_activate fastp
+module load conda/4.12.0
+source ~/.bashrc
+conda activate fastp
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
     echo "Fastp pour ${recipe_type}..."
     INPUT_DIR="${BASE_DIR}/05_clumpify/${recipe_type}"
     OUTPUT_DIR="${BASE_DIR}/06_fastp/${recipe_type}"
     LOG_DIR="${BASE_DIR}/00_scripts/fastp_logs/${recipe_type}"
-    mkdir -p "$OUTPUT_DIR" "$LOG_DIR"
+    mkdir -p "$OUTPUT_DIR"
+    mkdir -p "$LOG_DIR"
     
-    for R1 in "${INPUT_DIR}"/*_clumpify_R1.fastq.gz; do
-        if [[ ! -f "$R1" ]]; then continue; fi
-        
+    for R1 in "${INPUT_DIR}"/*_R1.fastq.gz; do
         R2="${R1/_R1.fastq.gz/_R2.fastq.gz}"
-        BASENAME=$(basename "$R1" _clumpify_R1.fastq.gz)
+        BASENAME=$(basename "$R1" _R1.fastq.gz)
         
         echo "  → Traitement de ${BASENAME}..."
         
@@ -408,13 +357,11 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
             --adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
             --adapter_sequence_r2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
             --detect_adapter_for_pe \
-            --thread 4 2>/dev/null
-        
-        echo "  ✓ ${BASENAME} traité par Fastp"
+            --thread 4
     done
 done
 
-safe_conda_deactivate
+conda deactivate
 
 echo "Fastp terminé."
 
@@ -426,7 +373,9 @@ echo ""
 echo "=== ÉTAPE 6: Classification taxonomique (Kraken2) ==="
 echo ""
 
-safe_conda_activate kraken2
+module load conda/4.12.0
+source ~/.bashrc
+conda activate kraken2
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
     echo "Kraken2 pour ${recipe_type}..."
@@ -445,9 +394,7 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
             echo "    • ${SAMPLE} (merged)"
             
             kraken2 --confidence 0.2 --db "$KRAKEN2_DB" --threads $THREADS \
-                --output "$OUT_KRAKEN" --report "$OUT_REPORT" "$MERGED" 2>/dev/null
-            
-            echo "    ✓ ${SAMPLE} merged analysé"
+                --output "$OUT_KRAKEN" --report "$OUT_REPORT" "$MERGED"
         fi
     done
     
@@ -465,15 +412,13 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
                 echo "    • ${SAMPLE} (unmerged)"
                 
                 kraken2 --confidence 0.2 --paired --db "$KRAKEN2_DB" --threads $THREADS \
-                    --output "$OUT_KRAKEN" --report "$OUT_REPORT" "$R1" "$R2" 2>/dev/null
-                
-                echo "    ✓ ${SAMPLE} unmerged analysé"
+                    --output "$OUT_KRAKEN" --report "$OUT_REPORT" "$R1" "$R2"
             fi
         fi
     done
 done
 
-safe_conda_deactivate
+conda deactivate
 
 echo "Classification Kraken2 terminée."
 
@@ -485,7 +430,9 @@ echo ""
 echo "=== ÉTAPE 7: Visualisation (Krona) ==="
 echo ""
 
-safe_conda_activate krona
+module load conda/4.12.0
+source ~/.bashrc
+conda activate krona
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
     echo "Krona pour ${recipe_type}..."
@@ -493,28 +440,21 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
     OUT_DIR="${BASE_DIR}/08_krona/${recipe_type}"
     mkdir -p "$OUT_DIR"
     
-    cd "$IN_DIR" || continue
+    cd "$IN_DIR"
     
-    # Vérifier qu'il y a des reports
-    if ls *.report 1> /dev/null 2>&1; then
-        # Krona pour tous les échantillons combinés
-        ktImportTaxonomy -t 5 -m 3 -o "${OUT_DIR}/all_samples_krona.html" *.report 2>/dev/null
-        echo "  ✓ Krona combiné généré: all_samples_krona.html"
-        
-        # Krona individuel pour chaque échantillon
-        for report in *.report; do
-            if [[ -f "$report" ]]; then
-                base=$(basename "$report" .report)
-                ktImportTaxonomy -t 5 -m 3 -o "${OUT_DIR}/${base}_krona.html" "$report" 2>/dev/null
-                echo "  ✓ Krona individuel: ${base}_krona.html"
-            fi
-        done
-    else
-        echo "  ✗ Aucun fichier report trouvé dans $IN_DIR"
-    fi
+    # Krona pour tous les échantillons combinés
+    ktImportTaxonomy -t 5 -m 3 -o "${OUT_DIR}/all_samples_krona.html" "${IN_DIR}"/*.report
+    
+    # Krona individuel pour chaque échantillon
+    for report in "${IN_DIR}"/*.report; do
+        if [[ -f "$report" ]]; then
+            base=$(basename "$report" .report)
+            ktImportTaxonomy -t 5 -m 3 -o "${OUT_DIR}/${base}_krona.html" "$report"
+        fi
+    done
 done
 
-safe_conda_deactivate
+conda deactivate
 
 echo "Visualisation Krona terminée."
 
@@ -532,7 +472,7 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
     OUT_DIR="${BASE_DIR}/09_mpa_tables/${recipe_type}"
     mkdir -p "$OUT_DIR"
     
-    cd "$IN_DIR" || continue
+    cd "$IN_DIR"
     
     # Conversion kreport vers format MPA
     declare -a mpa_files=()
@@ -542,48 +482,73 @@ for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; 
             mpa_file="${OUT_DIR}/${base}.mpa"
             
             echo "  → Conversion de ${base}..."
-            python3 "${KRAKENTOOLS_DIR}/kreport2mpa.py" -r "$report" -o "$mpa_file" 2>/dev/null
+            python3 "${KRAKENTOOLS_DIR}/kreport2mpa.py" -r "$report" -o "$mpa_file"
             
-            if [[ -f "$mpa_file" ]]; then
-                mpa_files+=("$mpa_file")
-                echo "  ✓ ${base}.mpa créé"
-            fi
+            mpa_files+=("$mpa_file")
         fi
     done
     
     # Combinaison de tous les fichiers MPA en une seule table
     if [[ ${#mpa_files[@]} -gt 0 ]]; then
-        echo "  → Combinaison de ${#mpa_files[@]} fichiers MPA..."
-        python3 "${KRAKENTOOLS_DIR}/combine_mpa.py" -i "${mpa_files[@]}" -o "${OUT_DIR}/combined_all.tsv" 2>/dev/null
-        echo "  ✓ Table combinée: combined_all.tsv"
+        echo "  → Combinaison de tous les fichiers MPA..."
+        python3 "${KRAKENTOOLS_DIR}/combine_mpa.py" -i "${mpa_files[@]}" -o "${OUT_DIR}/combined_all.tsv"
     fi
 done
 
 echo "Création des tables MPA terminée."
 
 ################################################################################
-# ÉTAPE 9: Génération du rapport final et statistiques
+# ÉTAPE 9: Génération du rapport de comparaison
 ################################################################################
 
 echo ""
-echo "=== ÉTAPE 9: Génération du rapport final ==="
+echo "=== ÉTAPE 9: Génération du rapport de comparaison ==="
 echo ""
 
-REPORT_FILE="${BASE_DIR}/00_scripts/pipeline_report_$(date +%Y%m%d_%H%M%S).txt"
+REPORT_FILE="${BASE_DIR}/00_scripts/pipeline_comparison_report.txt"
 
 cat > "$REPORT_FILE" << EOF
 ================================================================================
-RAPPORT D'ANALYSE PIPELINE CORSICA WRECK - $(date)
+RAPPORT D'ANALYSE - CORSICA WRECK SEDADNA
 ================================================================================
 
-PIPELINE TERMINÉ AVEC SUCCÈS
+Date d'analyse: $(date)
+Pipeline version: 1.0
 
-Échantillons analysés: ${SAMPLES[@]}
+================================================================================
+DESCRIPTION DU PROJET
+================================================================================
+
+Ce pipeline compare trois stratégies de séquençage pour 4 échantillons sedaDNA:
+
+Échantillons:
+  - 1121_sed8_rep1 (sédiment 8, réplicat 1)
+  - 1122_sed8_rep2 (sédiment 8, réplicat 2)
+  - 1129_sed6_rep1 (sédiment 6, réplicat 1)
+  - 1130_sed6_rep2 (sédiment 6, réplicat 2)
 
 Stratégies de séquençage:
-  1. recipe1_standard      - recipes-ShortInsert standard
-  2. recipe2_smallfrag     - recipes-v3.3.x-ShortInsert-SmallFragmentRecovery  
-  3. combined_recipe1_recipe2 - Fusion des deux stratégies
+  1. Recipe1 (recipe1_standard): recipes-ShortInsert (2x150bp)
+     → Séquençage standard pour fragments courts
+     
+  2. Recipe2 (recipe2_smallfrag): recipes-v3.3.x-ShortInsert-SmallFragmentRecovery (2x150bp)
+     → Optimisé pour la récupération de très petits fragments (aDNA)
+     
+  3. Combined (combined_recipe1_recipe2): Recipe1 + Recipe2
+     → Fusion des deux datasets pour maximiser la profondeur de séquençage
+
+================================================================================
+ÉTAPES DU PIPELINE
+================================================================================
+
+1. Contrôle qualité (FastQC/MultiQC)
+2. Filtrage et trimming (BBDuk) - Élimination des adaptateurs et phiX
+3. Déduplication (FastUniq) - Suppression des duplicats PCR
+4. Clumpify - Déduplication optique supplémentaire
+5. Fastp - Merging des reads et contrôle qualité final
+6. Classification taxonomique (Kraken2) - Base de données nt
+7. Visualisation (Krona) - Charts interactifs de composition taxonomique
+8. Tables d'assignation (MPA format) - Pour analyses downstream
 
 ================================================================================
 LOCALISATION DES RÉSULTATS
@@ -591,57 +556,139 @@ LOCALISATION DES RÉSULTATS
 
 Répertoire principal: ${BASE_DIR}
 
-Résultats par étape:
-  • Contrôle qualité:     02_quality_check/
-  • Reads filtrés:        03_bbduk/ → 04_fastuniq/ → 05_clumpify/
-  • Reads finaux:         06_fastp/
-  • Classification:       07_kraken2/
-  • Visualisations:       08_krona/
-  • Tables d'analyse:     09_mpa_tables/
+Structure des résultats:
+  ├── 01_raw_data/                    # Données brutes
+  │   ├── recipe1_standard/           # Recipe 1
+  │   ├── recipe2_smallfrag/          # Recipe 2
+  │   └── combined_recipe1_recipe2/   # Recipe 1+2
+  │
+  ├── 02_quality_check/               # Rapports FastQC/MultiQC
+  ├── 03_bbduk/                       # Reads filtrés
+  ├── 04_fastuniq/                    # Reads dédupliqués
+  ├── 05_clumpify/                    # Déduplication optique
+  ├── 06_fastp/                       # Reads merged et unmerged finaux
+  │
+  ├── 07_kraken2/                     # Classification taxonomique
+  │   ├── recipe1_standard/
+  │   ├── recipe2_smallfrag/
+  │   └── combined_recipe1_recipe2/
+  │
+  ├── 08_krona/                       # Visualisations interactives
+  │   ├── recipe1_standard/
+  │   ├── recipe2_smallfrag/
+  │   └── combined_recipe1_recipe2/
+  │
+  └── 09_mpa_tables/                  # Tables d'assignation
+      ├── recipe1_standard/
+      ├── recipe2_smallfrag/
+      └── combined_recipe1_recipe2/
 
 ================================================================================
-ANALYSES RECOMMANDÉES
+ANALYSES DE COMPARAISON RECOMMANDÉES
 ================================================================================
 
-1. Consulter les rapports MultiQC:
-   firefox ${BASE_DIR}/02_quality_check/*/multiqc_*.html
+Pour comparer les performances des 3 stratégies, examinez:
 
-2. Explorer les visualisations Krona:
-   firefox ${BASE_DIR}/08_krona/*/all_samples_krona.html
+1. Nombre de reads à chaque étape:
+   - Comparez le taux de rétention entre Recipe1, Recipe2 et Combined
+   - Vérifiez le taux de merging (indicateur de qualité aDNA)
 
-3. Analyser avec R:
-   library(tidyverse)
-   r1 <- read_tsv("${BASE_DIR}/09_mpa_tables/recipe1_standard/combined_all.tsv")
-   r2 <- read_tsv("${BASE_DIR}/09_mpa_tables/recipe2_smallfrag/combined_all.tsv")
-   combined <- read_tsv("${BASE_DIR}/09_mpa_tables/combined_recipe1_recipe2/combined_all.tsv")
+2. Composition taxonomique:
+   - Ouvrez les fichiers Krona pour visualisation interactive
+   - Comparez la diversité détectée entre les recettes
+   - Identifiez les taxons uniquement détectés par Recipe2 (fragments courts)
+
+3. Analyse quantitative:
+   - Utilisez les fichiers combined_all.tsv dans 09_mpa_tables/
+   - Importez dans R pour analyses statistiques et visualisations
+
+4. Évaluation de la valeur ajoutée:
+   - Recipe2 vs Recipe1: Récupération de fragments courts supplémentaires?
+   - Combined vs Recipe1/Recipe2: Augmentation significative de profondeur?
 
 ================================================================================
-STATISTIQUES FINALES
+COMMANDES POUR ANALYSES COMPLÉMENTAIRES EN R
 ================================================================================
 
-EOF
+# Chargement et comparaison des tables MPA
+library(tidyverse)
 
-# Ajout des statistiques
-for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
-    echo "Statistiques ${recipe_type}:" >> "$REPORT_FILE"
-    
-    RAW=$(find "${BASE_DIR}/01_raw_data/${recipe_type}" -name "*.fastq.gz" 2>/dev/null | wc -l)
-    MERGED=$(find "${BASE_DIR}/06_fastp/${recipe_type}" -name "*_merged.fastq.gz" 2>/dev/null | wc -l)
-    REPORTS=$(find "${BASE_DIR}/07_kraken2/${recipe_type}" -name "*.report" 2>/dev/null | wc -l)
-    
-    echo "  - Fichiers bruts: ${RAW}" >> "$REPORT_FILE"
-    echo "  - Fichiers merged: ${MERGED}" >> "$REPORT_FILE"
-    echo "  - Rapports Kraken2: ${REPORTS}" >> "$REPORT_FILE"
-    echo "" >> "$REPORT_FILE"
-done
+# Recipe 1
+mpa_r1 <- read_tsv("${BASE_DIR}/09_mpa_tables/recipe1_standard/combined_all.tsv")
 
-cat >> "$REPORT_FILE" << EOF
+# Recipe 2
+mpa_r2 <- read_tsv("${BASE_DIR}/09_mpa_tables/recipe2_smallfrag/combined_all.tsv")
+
+# Combined
+mpa_combined <- read_tsv("${BASE_DIR}/09_mpa_tables/combined_recipe1_recipe2/combined_all.tsv")
+
+# Comparaison de la richesse taxonomique
+richness_comparison <- tibble(
+  Recipe = c("Recipe1_Standard", "Recipe2_SmallFrag", "Combined"),
+  N_taxa = c(nrow(mpa_r1), nrow(mpa_r2), nrow(mpa_combined))
+)
+
+# Visualisation
+ggplot(richness_comparison, aes(x = Recipe, y = N_taxa, fill = Recipe)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Richesse taxonomique par stratégie de séquençage",
+       y = "Nombre de taxons détectés")
+
 ================================================================================
-PIPELINE TERMINE - $(date)
+INFORMATIONS SUPPLÉMENTAIRES
+================================================================================
+
+Base de données Kraken2: ${KRAKEN2_DB}
+KrakenTools: ${KRAKENTOOLS_DIR}
+
+Pour toute question, contacter: pierrelouis.stenger@gmail.com
+
 ================================================================================
 EOF
 
 cat "$REPORT_FILE"
+
+echo ""
+echo "Rapport généré: $REPORT_FILE"
+
+################################################################################
+# ÉTAPE 10: Statistiques finales
+################################################################################
+
+echo ""
+echo "=== ÉTAPE 10: Génération des statistiques ==="
+echo ""
+
+STATS_FILE="${BASE_DIR}/00_scripts/pipeline_statistics.txt"
+
+cat > "$STATS_FILE" << EOF
+================================================================================
+STATISTIQUES D'ANALYSE - CORSICA WRECK
+================================================================================
+
+Date: $(date)
+
+EOF
+
+for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
+    echo "Statistiques pour ${recipe_type}..." >> "$STATS_FILE"
+    echo "----------------------------------------" >> "$STATS_FILE"
+    
+    # Compter les fichiers à différentes étapes
+    RAW_COUNT=$(ls "${BASE_DIR}/01_raw_data/${recipe_type}"/*.fastq.gz 2>/dev/null | wc -l)
+    BBDUK_COUNT=$(ls "${BASE_DIR}/03_bbduk/${recipe_type}"/clean_*.fastq.gz 2>/dev/null | wc -l)
+    FASTP_COUNT=$(ls "${BASE_DIR}/06_fastp/${recipe_type}"/*_merged.fastq.gz 2>/dev/null | wc -l)
+    KRAKEN_COUNT=$(ls "${BASE_DIR}/07_kraken2/${recipe_type}"/*.report 2>/dev/null | wc -l)
+    
+    echo "Fichiers bruts: ${RAW_COUNT}" >> "$STATS_FILE"
+    echo "Fichiers après BBDuk: ${BBDUK_COUNT}" >> "$STATS_FILE"
+    echo "Fichiers merged (Fastp): ${FASTP_COUNT}" >> "$STATS_FILE"
+    echo "Rapports Kraken2: ${KRAKEN_COUNT}" >> "$STATS_FILE"
+    echo "" >> "$STATS_FILE"
+done
+
+cat "$STATS_FILE"
 
 ################################################################################
 # FIN DU PIPELINE
@@ -653,15 +700,19 @@ echo "PIPELINE TERMINÉ AVEC SUCCÈS"
 echo "Date de fin: $(date)"
 echo "=========================================="
 echo ""
-echo "Rapport final: $REPORT_FILE"
+echo "Résultats disponibles dans: ${BASE_DIR}"
+echo "Rapport: ${REPORT_FILE}"
+echo "Statistiques: ${STATS_FILE}"
 echo ""
-echo "Pour analyser les résultats:"
-echo "  cd ${BASE_DIR}"
-echo "  ls -lah */recipe*/"
+echo "Prochaines étapes:"
+echo "  1. Consultez les rapports MultiQC dans 02_quality_check/"
+echo "  2. Explorez les visualisations Krona dans 08_krona/"
+echo "  3. Analysez les tables MPA dans 09_mpa_tables/ avec R"
+echo "  4. Comparez les performances des 3 stratégies de séquençage"
 echo ""
 
-# Notification email (si configuré)
-echo "Pipeline Corsica wreck terminé - $(date)" | \
-    mail -s "Pipeline sedaDNA - Terminé" pierrelouis.stenger@gmail.com 2>/dev/null || true
+# Envoi d'un email de notification (si configuré)
+echo "Pipeline Corsica wreck terminé le $(date). Résultats: ${BASE_DIR}" | \
+    mail -s "Pipeline sedaDNA Corsica - Terminé" pierrelouis.stenger@gmail.com 2>/dev/null || true
 
 exit 0
