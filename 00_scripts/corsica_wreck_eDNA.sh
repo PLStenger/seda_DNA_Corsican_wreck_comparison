@@ -75,81 +75,81 @@ mkdir -p "${BASE_DIR}/07_kraken2"
 mkdir -p "${BASE_DIR}/08_krona"
 mkdir -p "${BASE_DIR}/09_mpa_tables"
 
-# Copie des fichiers Recipe 1 (Standard ShortInsert)
-echo "Copie des fichiers Recipe1 (Standard ShortInsert)..."
-for sample in "${SAMPLES[@]}"; do
-    cp "${RECIPE1_DIR}/${sample}_R1.fastq.gz" "${BASE_DIR}/01_raw_data/recipe1_standard/" 2>/dev/null || echo "Warning: ${sample} R1 not found in Recipe1"
-    cp "${RECIPE1_DIR}/${sample}_R2.fastq.gz" "${BASE_DIR}/01_raw_data/recipe1_standard/" 2>/dev/null || echo "Warning: ${sample} R2 not found in Recipe1"
-done
-
-# Copie des fichiers Recipe 2 (SmallFragmentRecovery)
-echo "Copie des fichiers Recipe2 (SmallFragmentRecovery)..."
-for sample in "${SAMPLES[@]}"; do
-    cp "${RECIPE2_DIR}/${sample}/${sample}_R1.fastq.gz" "${BASE_DIR}/01_raw_data/recipe2_smallfrag/" 2>/dev/null || echo "Warning: ${sample} R1 not found in Recipe2"
-    cp "${RECIPE2_DIR}/${sample}/${sample}_R2.fastq.gz" "${BASE_DIR}/01_raw_data/recipe2_smallfrag/" 2>/dev/null || echo "Warning: ${sample} R2 not found in Recipe2"
-done
-
-# Création des fichiers combinés (Recipe1 + Recipe2)
-echo "Fusion des fichiers Recipe1 + Recipe2..."
-for sample in "${SAMPLES[@]}"; do
-    R1_RECIPE1="${BASE_DIR}/01_raw_data/recipe1_standard/${sample}_R1.fastq.gz"
-    R2_RECIPE1="${BASE_DIR}/01_raw_data/recipe1_standard/${sample}_R2.fastq.gz"
-    R1_RECIPE2="${BASE_DIR}/01_raw_data/recipe2_smallfrag/${sample}_R1.fastq.gz"
-    R2_RECIPE2="${BASE_DIR}/01_raw_data/recipe2_smallfrag/${sample}_R2.fastq.gz"
-    
-    # Vérification que les fichiers existent
-    if [[ -f "$R1_RECIPE1" ]] && [[ -f "$R1_RECIPE2" ]]; then
-        cat "$R1_RECIPE1" "$R1_RECIPE2" > "${BASE_DIR}/01_raw_data/combined_recipe1_recipe2/${sample}_R1.fastq.gz"
-        echo "  → ${sample}_R1 combiné créé"
-    fi
-    
-    if [[ -f "$R2_RECIPE1" ]] && [[ -f "$R2_RECIPE2" ]]; then
-        cat "$R2_RECIPE1" "$R2_RECIPE2" > "${BASE_DIR}/01_raw_data/combined_recipe1_recipe2/${sample}_R2.fastq.gz"
-        echo "  → ${sample}_R2 combiné créé"
-    fi
-done
-
-echo "Préparation des données terminée."
-
-################################################################################
-# ÉTAPE 1: Contrôle qualité avec FastQC et MultiQC
-################################################################################
-
-echo ""
-echo "=== ÉTAPE 1: Contrôle qualité (FastQC/MultiQC) ==="
-echo ""
-
-module load conda/4.12.0
-source ~/.bashrc
-conda activate fastqc
-
-# FastQC pour chaque type de recette
-for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
-    echo "FastQC pour ${recipe_type}..."
-    RECIPE_DIR="${BASE_DIR}/01_raw_data/${recipe_type}"
-    OUTPUT_DIR="${BASE_DIR}/02_quality_check/${recipe_type}"
-    mkdir -p "$OUTPUT_DIR"
-    
-    for FILE in "${RECIPE_DIR}"/*.fastq.gz; do
-        if [[ -f "$FILE" ]]; then
-            fastqc "$FILE" -o "$OUTPUT_DIR" -t 4
-        fi
-    done
-done
-
-conda deactivate
-
-# MultiQC pour résumer tous les rapports
-conda activate multiqc
-for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
-    echo "MultiQC pour ${recipe_type}..."
-    OUTPUT_DIR="${BASE_DIR}/02_quality_check/${recipe_type}"
-    cd "$OUTPUT_DIR"
-    multiqc . -n "multiqc_${recipe_type}.html"
-done
-conda deactivate
-
-echo "Contrôle qualité terminé."
+## Copie des fichiers Recipe 1 (Standard ShortInsert)
+#echo "Copie des fichiers Recipe1 (Standard ShortInsert)..."
+#for sample in "${SAMPLES[@]}"; do
+#    cp "${RECIPE1_DIR}/${sample}_R1.fastq.gz" "${BASE_DIR}/01_raw_data/recipe1_standard/" 2>/dev/null || echo "Warning: ${sample} R1 not found in Recipe1"
+#    cp "${RECIPE1_DIR}/${sample}_R2.fastq.gz" "${BASE_DIR}/01_raw_data/recipe1_standard/" 2>/dev/null || echo "Warning: ${sample} R2 not found in Recipe1"
+#done
+#
+## Copie des fichiers Recipe 2 (SmallFragmentRecovery)
+#echo "Copie des fichiers Recipe2 (SmallFragmentRecovery)..."
+#for sample in "${SAMPLES[@]}"; do
+#    cp "${RECIPE2_DIR}/${sample}/${sample}_R1.fastq.gz" "${BASE_DIR}/01_raw_data/recipe2_smallfrag/" 2>/dev/null || echo "Warning: ${sample} R1 not found in Recipe2"
+#    cp "${RECIPE2_DIR}/${sample}/${sample}_R2.fastq.gz" "${BASE_DIR}/01_raw_data/recipe2_smallfrag/" 2>/dev/null || echo "Warning: ${sample} R2 not found in Recipe2"
+#done
+#
+## Création des fichiers combinés (Recipe1 + Recipe2)
+#echo "Fusion des fichiers Recipe1 + Recipe2..."
+#for sample in "${SAMPLES[@]}"; do
+#    R1_RECIPE1="${BASE_DIR}/01_raw_data/recipe1_standard/${sample}_R1.fastq.gz"
+#    R2_RECIPE1="${BASE_DIR}/01_raw_data/recipe1_standard/${sample}_R2.fastq.gz"
+#    R1_RECIPE2="${BASE_DIR}/01_raw_data/recipe2_smallfrag/${sample}_R1.fastq.gz"
+#    R2_RECIPE2="${BASE_DIR}/01_raw_data/recipe2_smallfrag/${sample}_R2.fastq.gz"
+#    
+#    # Vérification que les fichiers existent
+#    if [[ -f "$R1_RECIPE1" ]] && [[ -f "$R1_RECIPE2" ]]; then
+#        cat "$R1_RECIPE1" "$R1_RECIPE2" > "${BASE_DIR}/01_raw_data/combined_recipe1_recipe2/${sample}_R1.fastq.gz"
+#        echo "  → ${sample}_R1 combiné créé"
+#    fi
+#    
+#    if [[ -f "$R2_RECIPE1" ]] && [[ -f "$R2_RECIPE2" ]]; then
+#        cat "$R2_RECIPE1" "$R2_RECIPE2" > "${BASE_DIR}/01_raw_data/combined_recipe1_recipe2/${sample}_R2.fastq.gz"
+#        echo "  → ${sample}_R2 combiné créé"
+#    fi
+#done
+#
+#echo "Préparation des données terminée."
+#
+#################################################################################
+## ÉTAPE 1: Contrôle qualité avec FastQC et MultiQC
+#################################################################################
+#
+#echo ""
+#echo "=== ÉTAPE 1: Contrôle qualité (FastQC/MultiQC) ==="
+#echo ""
+#
+#module load conda/4.12.0
+##source ~/.bashrc
+#conda activate fastqc
+#
+## FastQC pour chaque type de recette
+#for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
+#    echo "FastQC pour ${recipe_type}..."
+#    RECIPE_DIR="${BASE_DIR}/01_raw_data/${recipe_type}"
+#    OUTPUT_DIR="${BASE_DIR}/02_quality_check/${recipe_type}"
+#    mkdir -p "$OUTPUT_DIR"
+#    
+#    for FILE in "${RECIPE_DIR}"/*.fastq.gz; do
+#        if [[ -f "$FILE" ]]; then
+#            fastqc "$FILE" -o "$OUTPUT_DIR" -t 4
+#        fi
+#    done
+#done
+#
+#conda deactivate
+#
+## MultiQC pour résumer tous les rapports
+#conda activate multiqc
+#for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
+#    echo "MultiQC pour ${recipe_type}..."
+#    OUTPUT_DIR="${BASE_DIR}/02_quality_check/${recipe_type}"
+#    cd "$OUTPUT_DIR"
+#    multiqc . -n "multiqc_${recipe_type}.html"
+#done
+#conda deactivate
+#
+#echo "Contrôle qualité terminé."
 
 ################################################################################
 # ÉTAPE 2: Filtrage et trimming avec BBDuk
@@ -160,7 +160,7 @@ echo "=== ÉTAPE 2: Filtrage et trimming (BBDuk) ==="
 echo ""
 
 module load conda/4.12.0
-source ~/.bashrc
+#source ~/.bashrc
 conda activate bbduk
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -215,7 +215,7 @@ echo "=== ÉTAPE 3: Déduplication (FastUniq) ==="
 echo ""
 
 module load conda/4.12.0
-source ~/.bashrc
+#source ~/.bashrc
 conda activate fastuniq
 
 TMP="/tmp/fastuniq_corsica_tmp"
@@ -270,7 +270,7 @@ echo "=== ÉTAPE 4: Clumpify (déduplication optique) ==="
 echo ""
 
 module load conda/4.12.0
-source ~/.bashrc
+#source ~/.bashrc
 conda activate bbduk
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -310,7 +310,7 @@ echo "=== ÉTAPE 5: Fastp (merging et QC final) ==="
 echo ""
 
 module load conda/4.12.0
-source ~/.bashrc
+#source ~/.bashrc
 conda activate fastp
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -374,7 +374,7 @@ echo "=== ÉTAPE 6: Classification taxonomique (Kraken2) ==="
 echo ""
 
 module load conda/4.12.0
-source ~/.bashrc
+#source ~/.bashrc
 conda activate kraken2
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -431,7 +431,7 @@ echo "=== ÉTAPE 7: Visualisation (Krona) ==="
 echo ""
 
 module load conda/4.12.0
-source ~/.bashrc
+#source ~/.bashrc
 conda activate krona
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
