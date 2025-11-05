@@ -120,7 +120,7 @@ mkdir -p "${BASE_DIR}/09_mpa_tables"
 #echo ""
 #
 #module load conda/4.12.0
-##source ~/.bashrc
+#source ~/.bashrc
 #conda activate fastqc
 #
 ## FastQC pour chaque type de recette
@@ -160,7 +160,7 @@ echo "=== ÉTAPE 2: Filtrage et trimming (BBDuk) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate bbduk
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -215,7 +215,7 @@ echo "=== ÉTAPE 3: Déduplication (FastUniq) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate fastuniq
 
 TMP="/tmp/fastuniq_corsica_tmp"
@@ -270,7 +270,7 @@ echo "=== ÉTAPE 4: Clumpify (déduplication optique) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate bbduk
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -310,7 +310,7 @@ echo "=== ÉTAPE 5: Fastp (merging et QC final) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate fastp
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -374,7 +374,7 @@ echo "=== ÉTAPE 6: Classification taxonomique (Kraken2) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate kraken2
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -431,7 +431,7 @@ echo "=== ÉTAPE 7: Visualisation (Krona) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate krona
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
