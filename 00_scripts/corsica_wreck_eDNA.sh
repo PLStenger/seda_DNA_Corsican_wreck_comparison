@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #SBATCH --job-name=corsica_wreck_eDNA
 #SBATCH --ntasks=1
 #SBATCH -p smp
