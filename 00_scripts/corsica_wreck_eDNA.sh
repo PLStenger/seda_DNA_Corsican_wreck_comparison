@@ -28,7 +28,7 @@
 # - 1130_sed6_rep2 (sed6, réplicat 2)
 ################################################################################
 
-set -euo pipefail
+set -eo pipefail
 
 # Définition des chemins de base
 BASE_DIR="/home/plstenge/seda_DNA_Corsican_wreck_comparison"
