@@ -270,10 +270,10 @@ echo "=== ÉTAPE 4: Clumpify (déduplication optique) ==="
 echo ""
 
 
-eval "$(conda shell.bash hook)"
-module load conda/4.12.0
+#eval "$(conda shell.bash hook)"
+#module load conda/4.12.0
 #source ~/.bashrc
-source activate bbduk
+#source activate bbduk
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
     echo "Clumpify pour ${recipe_type}..."
