@@ -120,7 +120,7 @@ mkdir -p "${BASE_DIR}/09_mpa_tables"
 #echo ""
 #
 #module load conda/4.12.0
-##source ~/.bashrc
+#source ~/.bashrc
 #conda activate fastqc
 #
 ## FastQC pour chaque type de recette
@@ -160,7 +160,7 @@ mkdir -p "${BASE_DIR}/09_mpa_tables"
 #echo ""
 #
 #module load conda/4.12.0
-##source ~/.bashrc
+#source ~/.bashrc
 #conda activate bbduk
 #
 #for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -206,60 +206,60 @@ mkdir -p "${BASE_DIR}/09_mpa_tables"
 #
 #echo "Filtrage BBDuk terminé."
 
-################################################################################
-# ÉTAPE 3: Déduplication avec FastUniq
-################################################################################
-
-echo ""
-echo "=== ÉTAPE 3: Déduplication (FastUniq) ==="
-echo ""
-
-module load conda/4.12.0
+#################################################################################
+## ÉTAPE 3: Déduplication avec FastUniq
+#################################################################################
+#
+#echo ""
+#echo "=== ÉTAPE 3: Déduplication (FastUniq) ==="
+#echo ""
+#
+#module load conda/4.12.0
 source ~/.bashrc
-conda activate fastuniq
-
-TMP="/tmp/fastuniq_corsica_tmp"
-mkdir -p "$TMP"
-
-for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
-    echo "FastUniq pour ${recipe_type}..."
-    INPUT_DIR="${BASE_DIR}/03_bbduk/${recipe_type}"
-    OUTPUT_DIR="${BASE_DIR}/04_fastuniq/${recipe_type}"
-    mkdir -p "$OUTPUT_DIR"
-    
-    cd "$INPUT_DIR" || continue
-    
-    for R1_gz in clean_*_R1.fastq.gz; do
-        base=$(echo "$R1_gz" | sed 's/_R1\.fastq\.gz//')
-        R2_gz="${base}_R2.fastq.gz"
-        
-        if [[ -f "$R2_gz" ]]; then
-            echo "  → Traitement de ${base}..."
-            
-            R1_tmp="${TMP}/${base}_R1.fastq"
-            R2_tmp="${TMP}/${base}_R2.fastq"
-            listfile="${TMP}/${base}.list"
-            
-            zcat "$INPUT_DIR/$R1_gz" > "$R1_tmp"
-            zcat "$INPUT_DIR/$R2_gz" > "$R2_tmp"
-            
-            echo -e "${R1_tmp}\n${R2_tmp}" > "$listfile"
-            
-            fastuniq -i "$listfile" -t q \
-                -o "${OUTPUT_DIR}/${base}_dedup_R1.fastq" \
-                -p "${OUTPUT_DIR}/${base}_dedup_R2.fastq"
-            
-            rm -f "$R1_tmp" "$R2_tmp" "$listfile"
-        else
-            echo "ATTENTION: fichier R2 manquant pour $base"
-        fi
-    done
-done
-
-rm -rf "$TMP"
-conda deactivate
-
-echo "Déduplication FastUniq terminée."
+#conda activate fastuniq
+#
+#TMP="/tmp/fastuniq_corsica_tmp"
+#mkdir -p "$TMP"
+#
+#for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
+#    echo "FastUniq pour ${recipe_type}..."
+#    INPUT_DIR="${BASE_DIR}/03_bbduk/${recipe_type}"
+#    OUTPUT_DIR="${BASE_DIR}/04_fastuniq/${recipe_type}"
+#    mkdir -p "$OUTPUT_DIR"
+#    
+#    cd "$INPUT_DIR" || continue
+#    
+#    for R1_gz in clean_*_R1.fastq.gz; do
+#        base=$(echo "$R1_gz" | sed 's/_R1\.fastq\.gz//')
+#        R2_gz="${base}_R2.fastq.gz"
+#        
+#        if [[ -f "$R2_gz" ]]; then
+#            echo "  → Traitement de ${base}..."
+#            
+#            R1_tmp="${TMP}/${base}_R1.fastq"
+#            R2_tmp="${TMP}/${base}_R2.fastq"
+#            listfile="${TMP}/${base}.list"
+#            
+#            zcat "$INPUT_DIR/$R1_gz" > "$R1_tmp"
+#            zcat "$INPUT_DIR/$R2_gz" > "$R2_tmp"
+#            
+#            echo -e "${R1_tmp}\n${R2_tmp}" > "$listfile"
+#            
+#            fastuniq -i "$listfile" -t q \
+#                -o "${OUTPUT_DIR}/${base}_dedup_R1.fastq" \
+#                -p "${OUTPUT_DIR}/${base}_dedup_R2.fastq"
+#            
+#            rm -f "$R1_tmp" "$R2_tmp" "$listfile"
+#        else
+#            echo "ATTENTION: fichier R2 manquant pour $base"
+#        fi
+#    done
+#done
+#
+#rm -rf "$TMP"
+#conda deactivate
+#
+#echo "Déduplication FastUniq terminée."
 
 ################################################################################
 # ÉTAPE 4: Clumpify - Déduplication optique supplémentaire
@@ -270,7 +270,7 @@ echo "=== ÉTAPE 4: Clumpify (déduplication optique) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate bbduk
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -310,7 +310,7 @@ echo "=== ÉTAPE 5: Fastp (merging et QC final) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate fastp
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -374,7 +374,7 @@ echo "=== ÉTAPE 6: Classification taxonomique (Kraken2) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate kraken2
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
@@ -431,7 +431,7 @@ echo "=== ÉTAPE 7: Visualisation (Krona) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate krona
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
