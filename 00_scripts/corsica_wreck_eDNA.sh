@@ -215,7 +215,7 @@ echo "=== ÉTAPE 3: Déduplication (FastUniq) ==="
 echo ""
 
 module load conda/4.12.0
-#source ~/.bashrc
+source ~/.bashrc
 conda activate fastuniq
 
 TMP="/tmp/fastuniq_corsica_tmp"
