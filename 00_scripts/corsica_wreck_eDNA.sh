@@ -261,47 +261,47 @@ source ~/.bashrc
 #
 #echo "Déduplication FastUniq terminée."
 
-################################################################################
-# ÉTAPE 4: Clumpify - Déduplication optique supplémentaire
-################################################################################
-
-echo ""
-echo "=== ÉTAPE 4: Clumpify (déduplication optique) ==="
-echo ""
-
-
-#eval "$(conda shell.bash hook)"
-#module load conda/4.12.0
-#source ~/.bashrc
-#source activate bbduk
-
-for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
-    echo "Clumpify pour ${recipe_type}..."
-    INPUT_DIR="${BASE_DIR}/04_fastuniq/${recipe_type}"
-    OUTPUT_DIR="${BASE_DIR}/05_clumpify/${recipe_type}"
-    mkdir -p "$OUTPUT_DIR"
-    
-    for R1 in "${INPUT_DIR}"/*_R1.fastq; do
-        R2="${R1/_R1.fastq/_R2.fastq}"
-        
-        if [[ -f "$R2" ]]; then
-            base=$(basename "$R1" _R1.fastq)
-            echo "  → Traitement de ${base}..."
-            
-            $CLUMPIFY \
-                in="$R1" in2="$R2" \
-                out="${OUTPUT_DIR}/${base}_clumpify_R1.fastq.gz" \
-                out2="${OUTPUT_DIR}/${base}_clumpify_R2.fastq.gz" \
-                dedupe=t
-        else
-            echo "Fichier R2 manquant pour $R1, ignoré."
-        fi
-    done
-done
-
-conda deactivate
-
-echo "Clumpify terminé."
+# ################################################################################
+# # ÉTAPE 4: Clumpify - Déduplication optique supplémentaire
+# ################################################################################
+# 
+# echo ""
+# echo "=== ÉTAPE 4: Clumpify (déduplication optique) ==="
+# echo ""
+# 
+# 
+# #eval "$(conda shell.bash hook)"
+# #module load conda/4.12.0
+# #source ~/.bashrc
+# #source activate bbduk
+# 
+# for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
+#     echo "Clumpify pour ${recipe_type}..."
+#     INPUT_DIR="${BASE_DIR}/04_fastuniq/${recipe_type}"
+#     OUTPUT_DIR="${BASE_DIR}/05_clumpify/${recipe_type}"
+#     mkdir -p "$OUTPUT_DIR"
+#     
+#     for R1 in "${INPUT_DIR}"/*_R1.fastq; do
+#         R2="${R1/_R1.fastq/_R2.fastq}"
+#         
+#         if [[ -f "$R2" ]]; then
+#             base=$(basename "$R1" _R1.fastq)
+#             echo "  → Traitement de ${base}..."
+#             
+#             $CLUMPIFY \
+#                 in="$R1" in2="$R2" \
+#                 out="${OUTPUT_DIR}/${base}_clumpify_R1.fastq.gz" \
+#                 out2="${OUTPUT_DIR}/${base}_clumpify_R2.fastq.gz" \
+#                 dedupe=t
+#         else
+#             echo "Fichier R2 manquant pour $R1, ignoré."
+#         fi
+#     done
+# done
+# 
+# conda deactivate
+# 
+# echo "Clumpify terminé."
 
 ################################################################################
 # ÉTAPE 5: Fastp - Merging et contrôle qualité final
