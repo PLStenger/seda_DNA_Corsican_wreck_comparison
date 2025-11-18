@@ -311,9 +311,9 @@ echo ""
 echo "=== ÉTAPE 5: Fastp (merging et QC final) ==="
 echo ""
 
-module load conda/4.12.0
-source ~/.bashrc
-conda activate fastp
+#module load conda/4.12.0
+#source ~/.bashrc
+#conda activate fastp
 
 for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
     echo "Fastp pour ${recipe_type}..."
