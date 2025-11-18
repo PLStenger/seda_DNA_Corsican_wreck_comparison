@@ -215,7 +215,7 @@ mkdir -p "${BASE_DIR}/09_mpa_tables"
 #echo ""
 #
 #module load conda/4.12.0
-source ~/.bashrc
+#source ~/.bashrc
 #conda activate fastuniq
 #
 #TMP="/tmp/fastuniq_corsica_tmp"
@@ -303,69 +303,7 @@ source ~/.bashrc
 # 
 # echo "Clumpify terminé."
 
-################################################################################
-# ÉTAPE 5: Fastp - Merging et contrôle qualité final
-################################################################################
-
-echo ""
-echo "=== ÉTAPE 5: Fastp (merging et QC final) ==="
-echo ""
-
-#module load conda/4.12.0
-#source ~/.bashrc
-#conda activate fastp
-
-for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
-    echo "Fastp pour ${recipe_type}..."
-    INPUT_DIR="${BASE_DIR}/05_clumpify/${recipe_type}"
-    OUTPUT_DIR="${BASE_DIR}/06_fastp/${recipe_type}"
-    LOG_DIR="${BASE_DIR}/00_scripts/fastp_logs/${recipe_type}"
-    mkdir -p "$OUTPUT_DIR"
-    mkdir -p "$LOG_DIR"
-    
-    for R1 in "${INPUT_DIR}"/*_R1.fastq.gz; do
-        R2="${R1/_R1.fastq.gz/_R2.fastq.gz}"
-        BASENAME=$(basename "$R1" _R1.fastq.gz)
-        
-        echo "  → Traitement de ${BASENAME}..."
-        
-        OUT_R1="${OUTPUT_DIR}/${BASENAME}_fastp_R1.fastq.gz"
-        OUT_R2="${OUTPUT_DIR}/${BASENAME}_fastp_R2.fastq.gz"
-        MERGED="${OUTPUT_DIR}/${BASENAME}_fastp_merged.fastq.gz"
-        HTML="${LOG_DIR}/${BASENAME}_fastp.html"
-        JSON="${LOG_DIR}/${BASENAME}_fastp.json"
-        
-        fastp \
-            --in1 "$R1" --in2 "$R2" \
-            --out1 "$OUT_R1" --out2 "$OUT_R2" \
-            --merged_out "$MERGED" \
-            --length_required 30 \
-            --cut_front --cut_tail \
-            --cut_window_size 4 \
-            --cut_mean_quality 10 \
-            --n_base_limit 5 \
-            --unqualified_percent_limit 40 \
-            --complexity_threshold 30 \
-            --qualified_quality_phred 15 \
-            --low_complexity_filter \
-            --trim_poly_x \
-            --poly_x_min_len 10 \
-            --merge --correction \
-            --overlap_len_require 10 \
-            --overlap_diff_limit 5 \
-            --overlap_diff_percent_limit 20 \
-            --html "$HTML" \
-            --json "$JSON" \
-            --adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
-            --adapter_sequence_r2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
-            --detect_adapter_for_pe \
-            --thread 4
-    done
-done
-
-conda deactivate
-
-echo "Fastp terminé."
+#echo "Fastp terminé."
 
 ################################################################################
 # ÉTAPE 6: Classification taxonomique avec Kraken2
