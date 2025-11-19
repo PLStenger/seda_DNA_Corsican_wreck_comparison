@@ -305,62 +305,62 @@ mkdir -p "${BASE_DIR}/09_mpa_tables"
 
 #echo "Fastp terminé."
 
-################################################################################
-# ÉTAPE 6: Classification taxonomique avec Kraken2
-################################################################################
-
-echo ""
-echo "=== ÉTAPE 6: Classification taxonomique (Kraken2) ==="
-echo ""
-
-module load conda/4.12.0
-source ~/.bashrc
-conda activate kraken2
-
-for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
-    echo "Kraken2 pour ${recipe_type}..."
-    FASTP_DIR="${BASE_DIR}/06_fastp/${recipe_type}"
-    OUT_DIR="${BASE_DIR}/07_kraken2/${recipe_type}"
-    mkdir -p "$OUT_DIR"
-    
-    # Analyse des reads merged (single-end)
-    echo "  → Analyse des reads merged..."
-    for MERGED in "${FASTP_DIR}"/*_fastp_merged.fastq.gz; do
-        if [[ -f "$MERGED" ]]; then
-            SAMPLE=$(basename "$MERGED" _fastp_merged.fastq.gz)
-            OUT_KRAKEN="${OUT_DIR}/${SAMPLE}_merged.kraken"
-            OUT_REPORT="${OUT_DIR}/${SAMPLE}_merged.report"
-            
-            echo "    • ${SAMPLE} (merged)"
-            
-            kraken2 --confidence 0.2 --db "$KRAKEN2_DB" --threads $THREADS \
-                --output "$OUT_KRAKEN" --report "$OUT_REPORT" "$MERGED"
-        fi
-    done
-    
-    # Analyse des reads unmerged (paired-end)
-    echo "  → Analyse des reads unmerged..."
-    for R1 in "${FASTP_DIR}"/*_fastp_R1.fastq.gz; do
-        if [[ -f "$R1" ]]; then
-            SAMPLE=$(basename "$R1" _fastp_R1.fastq.gz)
-            R2="${FASTP_DIR}/${SAMPLE}_fastp_R2.fastq.gz"
-            
-            if [[ -f "$R2" ]]; then
-                OUT_KRAKEN="${OUT_DIR}/${SAMPLE}_unmerged.kraken"
-                OUT_REPORT="${OUT_DIR}/${SAMPLE}_unmerged.report"
-                
-                echo "    • ${SAMPLE} (unmerged)"
-                
-                kraken2 --confidence 0.2 --paired --db "$KRAKEN2_DB" --threads $THREADS \
-                    --output "$OUT_KRAKEN" --report "$OUT_REPORT" "$R1" "$R2"
-            fi
-        fi
-    done
-done
-
-conda deactivate
-
-echo "Classification Kraken2 terminée."
+# ################################################################################
+# # ÉTAPE 6: Classification taxonomique avec Kraken2
+# ################################################################################
+# 
+# echo ""
+# echo "=== ÉTAPE 6: Classification taxonomique (Kraken2) ==="
+# echo ""
+# 
+# module load conda/4.12.0
+# source ~/.bashrc
+# conda activate kraken2
+# 
+# for recipe_type in recipe1_standard recipe2_smallfrag combined_recipe1_recipe2; do
+#     echo "Kraken2 pour ${recipe_type}..."
+#     FASTP_DIR="${BASE_DIR}/06_fastp/${recipe_type}"
+#     OUT_DIR="${BASE_DIR}/07_kraken2/${recipe_type}"
+#     mkdir -p "$OUT_DIR"
+#     
+#     # Analyse des reads merged (single-end)
+#     echo "  → Analyse des reads merged..."
+#     for MERGED in "${FASTP_DIR}"/*_fastp_merged.fastq.gz; do
+#         if [[ -f "$MERGED" ]]; then
+#             SAMPLE=$(basename "$MERGED" _fastp_merged.fastq.gz)
+#             OUT_KRAKEN="${OUT_DIR}/${SAMPLE}_merged.kraken"
+#             OUT_REPORT="${OUT_DIR}/${SAMPLE}_merged.report"
+#             
+#             echo "    • ${SAMPLE} (merged)"
+#             
+#             kraken2 --confidence 0.2 --db "$KRAKEN2_DB" --threads $THREADS \
+#                 --output "$OUT_KRAKEN" --report "$OUT_REPORT" "$MERGED"
+#         fi
+#     done
+#     
+#     # Analyse des reads unmerged (paired-end)
+#     echo "  → Analyse des reads unmerged..."
+#     for R1 in "${FASTP_DIR}"/*_fastp_R1.fastq.gz; do
+#         if [[ -f "$R1" ]]; then
+#             SAMPLE=$(basename "$R1" _fastp_R1.fastq.gz)
+#             R2="${FASTP_DIR}/${SAMPLE}_fastp_R2.fastq.gz"
+#             
+#             if [[ -f "$R2" ]]; then
+#                 OUT_KRAKEN="${OUT_DIR}/${SAMPLE}_unmerged.kraken"
+#                 OUT_REPORT="${OUT_DIR}/${SAMPLE}_unmerged.report"
+#                 
+#                 echo "    • ${SAMPLE} (unmerged)"
+#                 
+#                 kraken2 --confidence 0.2 --paired --db "$KRAKEN2_DB" --threads $THREADS \
+#                     --output "$OUT_KRAKEN" --report "$OUT_REPORT" "$R1" "$R2"
+#             fi
+#         fi
+#     done
+# done
+# 
+# conda deactivate
+# 
+# echo "Classification Kraken2 terminée."
 
 ################################################################################
 # ÉTAPE 7: Visualisation avec Krona
