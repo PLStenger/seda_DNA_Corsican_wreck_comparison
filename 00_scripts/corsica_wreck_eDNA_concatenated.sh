@@ -44,7 +44,137 @@ SAMPLES=(sed6 sed8)
 echo "Activation environnement conda..."
 module load conda/4.12.0
 source ~/.bashrc
-conda activate metagenomics
+#conda activate metagenomics
+
+# Activer l'environnement
+conda activate metagenomics39
+
+################################################################################
+# INSTALLATION DES OUTILS BIOINFORMATIQUES
+################################################################################
+
+# Canaux prioritaires
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+
+# CONTRÔLE QUALITÉ
+conda install -c bioconda fastqc=0.12.1 -y
+conda install -c bioconda multiqc=1.21 -y
+
+# NETTOYAGE ET FILTRAGE DES READS
+# BBMap (contient bbduk.sh et clumpify.sh)
+conda install -c bioconda bbmap=39.01 -y
+
+# FastUniq (déduplication)
+conda install -c bioconda fastuniq=1.1 -y
+
+# Fastp (trimming, merging, QC)
+conda install -c bioconda fastp=0.23.4 -y
+
+# CLASSIFICATION TAXONOMIQUE
+# Kraken2
+conda install -c bioconda kraken2=2.1.3 -y
+
+# Krona (visualisation)
+conda install -c bioconda krona=2.8.1 -y
+
+# KrakenTools (conversion et manipulation)
+# Note: KrakenTools n'est pas dans conda, installation via git (voir ci-dessous)
+
+# MAPPING ET ANALYSE ANCIEN DNA
+# BWA (mapping)
+conda install -c bioconda bwa=0.7.17 -y
+
+# SAMtools (manipulation BAM/SAM)
+conda install -c bioconda samtools=1.19 -y
+
+# MapDamage2 (analyse dommages aDNA)
+conda install -c bioconda mapdamage2=2.2.1 -y
+
+# UTILITAIRES
+# seqtk (manipulation FASTQ/FASTA)
+conda install -c bioconda seqtk=1.4 -y
+
+# pigz (compression parallèle)
+conda install -c conda-forge pigz=2.8 -y
+
+# bc (calculatrice bash)
+conda install -c conda-forge bc=1.07.1 -y
+
+# PYTHON SCIENTIFIQUE
+conda install -c conda-forge numpy=1.26.4 -y
+conda install -c conda-forge pandas=2.2.1 -y
+conda install -c conda-forge matplotlib=3.8.3 -y
+conda install -c conda-forge scipy=1.12.0 -y
+conda install -c conda-forge biopython=1.83 -y
+
+################################################################################
+# INSTALLATION DE KRAKENTOOLS (via Git)
+################################################################################
+
+# Créer un répertoire pour les outils externes
+mkdir -p ~/biotools
+cd ~/biotools
+
+# Cloner KrakenTools
+git clone https://github.com/jenniferlu717/KrakenTools.git
+
+# Ajouter au PATH (ajouter cette ligne à votre ~/.bashrc)
+echo 'export PATH="$HOME/biotools/KrakenTools:$PATH"' >> ~/.bashrc
+
+################################################################################
+# INITIALISATION DE LA TAXONOMIE KRONA
+################################################################################
+
+# Télécharger et installer la taxonomie Krona
+ktUpdateTaxonomy.sh
+
+################################################################################
+# VÉRIFICATION DE L'INSTALLATION
+################################################################################
+
+echo ""
+echo "======================================================================"
+echo "VÉRIFICATION DES INSTALLATIONS"
+echo "======================================================================"
+echo ""
+
+# Tester chaque outil
+echo "FastQC: $(fastqc --version 2>&1 | head -n1)"
+echo "MultiQC: $(multiqc --version)"
+echo "BBDuk: $(bbduk.sh --version 2>&1 | head -n1)"
+echo "Clumpify: $(clumpify.sh --version 2>&1 | head -n1)"
+echo "FastUniq: $(fastuniq -h 2>&1 | head -n1)"
+echo "Fastp: $(fastp --version 2>&1)"
+echo "Kraken2: $(kraken2 --version 2>&1 | head -n1)"
+echo "Krona: $(ktImportTaxonomy 2>&1 | grep -i version | head -n1)"
+echo "BWA: $(bwa 2>&1 | grep Version)"
+echo "SAMtools: $(samtools --version | head -n1)"
+echo "MapDamage: $(mapDamage --version 2>&1)"
+echo "seqtk: $(seqtk 2>&1 | grep Version)"
+echo "Python: $(python --version)"
+echo "NumPy: $(python -c 'import numpy; print(numpy.__version__)')"
+echo "Pandas: $(python -c 'import pandas; print(pandas.__version__)')"
+echo "Biopython: $(python -c 'import Bio; print(Bio.__version__)')"
+
+echo ""
+echo "======================================================================"
+echo "INSTALLATION TERMINÉE!"
+echo "======================================================================"
+echo ""
+echo "Environnement: corsica_wreck_pipeline"
+echo "Python: 3.9"
+echo ""
+echo "Pour activer l'environnement:"
+echo "  conda activate corsica_wreck_pipeline"
+echo ""
+echo "N'oubliez pas:"
+echo "  1. Télécharger une base de données Kraken2 (ex: k2_core_nt)"
+echo "  2. Indexer vos génomes de référence avec BWA"
+echo "  3. Ajouter KrakenTools au PATH (voir ~/.bashrc)"
+echo ""
+
 
 ################################################################################
 # CRÉATION ARBORESCENCE
@@ -320,9 +450,9 @@ MAPPINGINFO="${BASE_DIR}/11_summary_tables/mapping_bwa_info.tsv"
 mkdir -p "${DAMAGEBASE}"
 
 # Activer l'environnement MapDamage
-module load conda/4.12.0
-source ~/.bashrc
-conda activate mapdamagepy39
+#module load conda/4.12.0
+#source ~/.bashrc
+#conda activate mapdamagepy39
 
 echo "Script MapDamage started at $(date)" | tee -a "${LOGFILE}"
 
