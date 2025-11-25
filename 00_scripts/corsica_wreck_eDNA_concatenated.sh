@@ -75,11 +75,15 @@ done
 # CONCATÉNATION DES FICHIERS PAR ÉCHANTILLON
 ################################################################################
 
-# sed6
+
+echo "Concaténation des fichiers sed6..."
+
+# sed6 - R1
 cat \
   ${RAW_HOME}/1120_sed6_rep3_R1.fastq.gz \
   ${RUN1}/1120_sed6_rep3/1120_sed6_rep3_R1.fastq.gz \
   ${RUN2}/1120_sed6_rep3/1120_sed6_rep3_R1.fastq.gz \
+  ${RAW_HOME}/1129_sed6_rep1_R1.fastq.gz \
   ${RUN1}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
   ${RUN2}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
   ${RUN3}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
@@ -91,10 +95,12 @@ cat \
   ${RUN4}/1130_sed6_rep2/1130_sed6_rep2_R1.fastq.gz \
   > "${BASE_DIR}/01_raw_data/sed6/sed6_concat_R1.fastq.gz"
 
+# sed6 - R2
 cat \
   ${RAW_HOME}/1120_sed6_rep3_R2.fastq.gz \
   ${RUN1}/1120_sed6_rep3/1120_sed6_rep3_R2.fastq.gz \
   ${RUN2}/1120_sed6_rep3/1120_sed6_rep3_R2.fastq.gz \
+  ${RAW_HOME}/1129_sed6_rep1_R2.fastq.gz \
   ${RUN1}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
   ${RUN2}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
   ${RUN3}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
@@ -106,7 +112,11 @@ cat \
   ${RUN4}/1130_sed6_rep2/1130_sed6_rep2_R2.fastq.gz \
   > "${BASE_DIR}/01_raw_data/sed6/sed6_concat_R2.fastq.gz"
 
-# sed8
+echo "Concaténation sed6 terminée."
+
+echo "Concaténation des fichiers sed8..."
+
+# sed8 - R1
 cat \
   ${RAW_HOME}/1121_sed8_rep1_R1.fastq.gz \
   ${RUN1}/1121_sed8_rep1/1121_sed8_rep1_R1.fastq.gz \
@@ -123,6 +133,7 @@ cat \
   ${RUN2}/1131_sed8_rep3/1131_sed8_rep3_R1.fastq.gz \
   > "${BASE_DIR}/01_raw_data/sed8/sed8_concat_R1.fastq.gz"
 
+# sed8 - R2
 cat \
   ${RAW_HOME}/1121_sed8_rep1_R2.fastq.gz \
   ${RUN1}/1121_sed8_rep1/1121_sed8_rep1_R2.fastq.gz \
@@ -138,6 +149,9 @@ cat \
   ${RUN1}/1131_sed8_rep3/1131_sed8_rep3_R2.fastq.gz \
   ${RUN2}/1131_sed8_rep3/1131_sed8_rep3_R2.fastq.gz \
   > "${BASE_DIR}/01_raw_data/sed8/sed8_concat_R2.fastq.gz"
+
+echo "Concaténation sed8 terminée."
+echo "Concaténation terminée pour tous les échantillons."
 
 ################################################################################
 # QUALITÉ + NETTOYAGE (FastQC, MultiQC, BBDuk, FastUniq, Clumpify, Fastp)
