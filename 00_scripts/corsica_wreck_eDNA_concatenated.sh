@@ -165,15 +165,23 @@ for sample in "${SAMPLES[@]}"; do
   $BBDUK in1=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz in2=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz out1=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz out2=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz ref=$PHIX ktrim=r k=23 mink=11 hdist=1 tpe tbo minlen=25 qtrim=r trimq=20 stats=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_stats.txt
 
   # 3. Déduplication FastUniq
+  echo "FastUniq pour ${sample}..."
   mkdir -p ${BASE_DIR}/04_fastuniq/${sample}/tmp
+  # Décompresser les fichiers BBDuk
   zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq
   zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq
-  echo -e "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq\t${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq" > ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
+  # Créer le fichier liste pour FastUniq (UN FICHIER PAR LIGNE, pas de tabulation)
+  echo "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq" > ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
+  echo "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq" >> ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
+  # Exécuter FastUniq
   fastuniq -i ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list -t q -o ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq -p ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq
+  # Compresser les résultats
   gzip ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq
   gzip ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq
+  # Nettoyer les fichiers temporaires
   rm -rf ${BASE_DIR}/04_fastuniq/${sample}/tmp
-
+  echo "FastUniq terminé pour ${sample}."
+  
   # 4. Déduplication optique Clumpify
   $CLUMPIFY in=${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq.gz in2=${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq.gz out=${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R1.fastq.gz out2=${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R2.fastq.gz dedupe=t
 
