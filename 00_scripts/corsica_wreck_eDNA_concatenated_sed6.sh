@@ -162,7 +162,7 @@ for sample in "${SAMPLES[@]}"; do
  # multiqc ${BASE_DIR}/02_quality_check_raw/${sample} -o ${BASE_DIR}/02_quality_check_raw/${sample} --force
 
   # 2. Filtrage/adaptateurs BBDuk
-#  $BBDUK in1=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz in2=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz out1=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz out2=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz ref=$PHIX ktrim=r k=23 mink=11 hdist=1 tpe tbo minlen=25 qtrim=r trimq=20 stats=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_stats.txt
+  $BBDUK in1=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz in2=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz out1=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz out2=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz ref=$PHIX ktrim=r k=23 mink=11 hdist=1 tpe tbo minlen=25 qtrim=r trimq=20 stats=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_stats.txt
 
   # 3. Déduplication FastUniq
   echo "FastUniq pour ${sample}..."
