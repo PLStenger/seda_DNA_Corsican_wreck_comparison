@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=corsica_wreck_eDNA_concatenated
+#SBATCH --job-name=corsica_wreck_eDNA_concatenated_run_3_4
 #SBATCH --ntasks=1
 #SBATCH -p smp
 #SBATCH --mem=1000G
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL
-#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_comparison/00_scripts/corsica_wreck_eDNA_concatenated.err"
-#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_comparison/00_scripts/corsica_wreck_eDNA_concatenated.out"
+#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_comparison/00_scripts/corsica_wreck_eDNA_concatenated_run_3_4.err"
+#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_comparison/00_scripts/corsica_wreck_eDNA_concatenated_run_3_4.out"
 
 ################################################################################
 # Pipeline aDNA - Projet Corsica Wreck (concaténation par échantillon)
@@ -29,9 +29,14 @@ KRAKEN2_DB="/home/plstenge/k2_core_nt_20250609"
 KRAKENTOOLS_DIR="${BASE_DIR}/08_kraken2/KrakenTools"
 THREADS=36
 
-RAW_HOME="/home/plstenge/seda_DNA_Corsican_wreck/01_raw_data"
-RUN1="/storage/groups/gdec/shared_paleo/E1531_final/run1_20250320_AV241601_E1531_Ps5Lane1_Ps6Lane2"
-RUN2="/storage/groups/gdec/shared_paleo/E1531_final/run2_20250414_AV241601_E1531_Ps5_Ps6_14042025"
+################################################################################
+# SUFFIXE POUR RUN 3_4 (pour différencier des autres runs)
+################################################################################
+SUFFIX="_run_3_4"
+
+#RAW_HOME="/home/plstenge/seda_DNA_Corsican_wreck/01_raw_data"
+#RUN1="/storage/groups/gdec/shared_paleo/E1531_final/run1_20250320_AV241601_E1531_Ps5Lane1_Ps6Lane2"
+#RUN2="/storage/groups/gdec/shared_paleo/E1531_final/run2_20250414_AV241601_E1531_Ps5_Ps6_14042025"
 RUN3="/storage/groups/gdec/shared_paleo/E1531_final/run3_20251008_AV241601_E1531_Ps7_Ps8"
 RUN4="/storage/groups/gdec/shared_paleo/E1531_final/run4_20251104_AV241601_E1531_Ps7_Ps8_04112025"
 
@@ -58,7 +63,7 @@ for sample in "${SAMPLES[@]}"; do
     mkdir -p "${BASE_DIR}/05_clumpify/${sample}"
     mkdir -p "${BASE_DIR}/06_fastp/${sample}"
     mkdir -p "${BASE_DIR}/07_quality_check_clean/${sample}"
-    mkdir -p "${BASE_DIR}/08_kraken2/${sample}"
+    mkdir -p "${BASE_DIR}/08_kraken2/${sample}${SUFFIX}"
     mkdir -p "${BASE_DIR}/09_krona/${sample}"
     mkdir -p "${BASE_DIR}/10_mpa_tables/${sample}"
     mkdir -p "${BASE_DIR}/12_mapdamage/${sample}"
@@ -80,37 +85,37 @@ echo "Concaténation des fichiers sed6..."
 
 # sed6 - R1
 cat \
-  ${RAW_HOME}/1120_sed6_rep3_R1.fastq.gz \
-  ${RUN1}/1120_sed6_rep3/1120_sed6_rep3_R1.fastq.gz \
-  ${RUN2}/1120_sed6_rep3/1120_sed6_rep3_R1.fastq.gz \
-  ${RAW_HOME}/1129_sed6_rep1_R1.fastq.gz \
-  ${RUN1}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
-  ${RUN2}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
+ # ${RAW_HOME}/1120_sed6_rep3_R1.fastq.gz \
+ # ${RUN1}/1120_sed6_rep3/1120_sed6_rep3_R1.fastq.gz \
+ # ${RUN2}/1120_sed6_rep3/1120_sed6_rep3_R1.fastq.gz \
+ # ${RAW_HOME}/1129_sed6_rep1_R1.fastq.gz \
+ # ${RUN1}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
+ # ${RUN2}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
   ${RUN3}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
   ${RUN4}/1129_sed6_rep1/1129_sed6_rep1_R1.fastq.gz \
-  ${RAW_HOME}/1130_sed6_rep2_R1.fastq.gz \
-  ${RUN1}/1130_sed6_rep2/1130_sed6_rep2_R1.fastq.gz \
-  ${RUN2}/1130_sed6_rep2/1130_sed6_rep2_R1.fastq.gz \
+#  ${RAW_HOME}/1130_sed6_rep2_R1.fastq.gz \
+#  ${RUN1}/1130_sed6_rep2/1130_sed6_rep2_R1.fastq.gz \
+#  ${RUN2}/1130_sed6_rep2/1130_sed6_rep2_R1.fastq.gz \
   ${RUN3}/1130_sed6_rep2/1130_sed6_rep2_R1.fastq.gz \
   ${RUN4}/1130_sed6_rep2/1130_sed6_rep2_R1.fastq.gz \
-  > "${BASE_DIR}/01_raw_data/sed6/sed6_concat_R1.fastq.gz"
+  > "${BASE_DIR}/01_raw_data/sed6/sed6_run_3_4_concat_R1.fastq.gz"
 
 # sed6 - R2
 cat \
-  ${RAW_HOME}/1120_sed6_rep3_R2.fastq.gz \
-  ${RUN1}/1120_sed6_rep3/1120_sed6_rep3_R2.fastq.gz \
-  ${RUN2}/1120_sed6_rep3/1120_sed6_rep3_R2.fastq.gz \
-  ${RAW_HOME}/1129_sed6_rep1_R2.fastq.gz \
-  ${RUN1}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
-  ${RUN2}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
+ # ${RAW_HOME}/1120_sed6_rep3_R2.fastq.gz \
+ # ${RUN1}/1120_sed6_rep3/1120_sed6_rep3_R2.fastq.gz \
+ # ${RUN2}/1120_sed6_rep3/1120_sed6_rep3_R2.fastq.gz \
+ # ${RAW_HOME}/1129_sed6_rep1_R2.fastq.gz \
+ # ${RUN1}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
+ # ${RUN2}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
   ${RUN3}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
   ${RUN4}/1129_sed6_rep1/1129_sed6_rep1_R2.fastq.gz \
-  ${RAW_HOME}/1130_sed6_rep2_R2.fastq.gz \
-  ${RUN1}/1130_sed6_rep2/1130_sed6_rep2_R2.fastq.gz \
-  ${RUN2}/1130_sed6_rep2/1130_sed6_rep2_R2.fastq.gz \
+ # ${RAW_HOME}/1130_sed6_rep2_R2.fastq.gz \
+ # ${RUN1}/1130_sed6_rep2/1130_sed6_rep2_R2.fastq.gz \
+ # ${RUN2}/1130_sed6_rep2/1130_sed6_rep2_R2.fastq.gz \
   ${RUN3}/1130_sed6_rep2/1130_sed6_rep2_R2.fastq.gz \
   ${RUN4}/1130_sed6_rep2/1130_sed6_rep2_R2.fastq.gz \
-  > "${BASE_DIR}/01_raw_data/sed6/sed6_concat_R2.fastq.gz"
+  > "${BASE_DIR}/01_raw_data/sed6/sed6_run_3_4_concat_R2.fastq.gz"
 
 echo "Concaténation sed6 terminée."
 
@@ -118,37 +123,37 @@ echo "Concaténation des fichiers sed8..."
 
 # sed8 - R1
 cat \
-  ${RAW_HOME}/1121_sed8_rep1_R1.fastq.gz \
-  ${RUN1}/1121_sed8_rep1/1121_sed8_rep1_R1.fastq.gz \
-  ${RUN2}/1121_sed8_rep1/1121_sed8_rep1_R1.fastq.gz \
+ # ${RAW_HOME}/1121_sed8_rep1_R1.fastq.gz \
+ # ${RUN1}/1121_sed8_rep1/1121_sed8_rep1_R1.fastq.gz \
+ # ${RUN2}/1121_sed8_rep1/1121_sed8_rep1_R1.fastq.gz \
   ${RUN3}/1121_sed8_rep1/1121_sed8_rep1_R1.fastq.gz \
   ${RUN4}/1121_sed8_rep1/1121_sed8_rep1_R1.fastq.gz \
-  ${RAW_HOME}/1122_sed8_rep2_R1.fastq.gz \
-  ${RUN1}/1122_sed8_rep2/1122_sed8_rep2_R1.fastq.gz \
-  ${RUN2}/1122_sed8_rep2/1122_sed8_rep2_R1.fastq.gz \
+ # ${RAW_HOME}/1122_sed8_rep2_R1.fastq.gz \
+ # ${RUN1}/1122_sed8_rep2/1122_sed8_rep2_R1.fastq.gz \
+ # ${RUN2}/1122_sed8_rep2/1122_sed8_rep2_R1.fastq.gz \
   ${RUN3}/1122_sed8_rep2/1122_sed8_rep2_R1.fastq.gz \
   ${RUN4}/1122_sed8_rep2/1122_sed8_rep2_R1.fastq.gz \
-  ${RAW_HOME}/1131_sed8_rep3_R1.fastq.gz \
-  ${RUN1}/1131_sed8_rep3/1131_sed8_rep3_R1.fastq.gz \
-  ${RUN2}/1131_sed8_rep3/1131_sed8_rep3_R1.fastq.gz \
-  > "${BASE_DIR}/01_raw_data/sed8/sed8_concat_R1.fastq.gz"
+ # ${RAW_HOME}/1131_sed8_rep3_R1.fastq.gz \
+ # ${RUN1}/1131_sed8_rep3/1131_sed8_rep3_R1.fastq.gz \
+ # ${RUN2}/1131_sed8_rep3/1131_sed8_rep3_R1.fastq.gz \
+  > "${BASE_DIR}/01_raw_data/sed8/sed8_run_3_4_concat_R1.fastq.gz"
 
 # sed8 - R2
 cat \
-  ${RAW_HOME}/1121_sed8_rep1_R2.fastq.gz \
-  ${RUN1}/1121_sed8_rep1/1121_sed8_rep1_R2.fastq.gz \
-  ${RUN2}/1121_sed8_rep1/1121_sed8_rep1_R2.fastq.gz \
+ # ${RAW_HOME}/1121_sed8_rep1_R2.fastq.gz \
+ # ${RUN1}/1121_sed8_rep1/1121_sed8_rep1_R2.fastq.gz \
+ # ${RUN2}/1121_sed8_rep1/1121_sed8_rep1_R2.fastq.gz \
   ${RUN3}/1121_sed8_rep1/1121_sed8_rep1_R2.fastq.gz \
   ${RUN4}/1121_sed8_rep1/1121_sed8_rep1_R2.fastq.gz \
-  ${RAW_HOME}/1122_sed8_rep2_R2.fastq.gz \
-  ${RUN1}/1122_sed8_rep2/1122_sed8_rep2_R2.fastq.gz \
-  ${RUN2}/1122_sed8_rep2/1122_sed8_rep2_R2.fastq.gz \
+ # ${RAW_HOME}/1122_sed8_rep2_R2.fastq.gz \
+ # ${RUN1}/1122_sed8_rep2/1122_sed8_rep2_R2.fastq.gz \
+ # ${RUN2}/1122_sed8_rep2/1122_sed8_rep2_R2.fastq.gz \
   ${RUN3}/1122_sed8_rep2/1122_sed8_rep2_R2.fastq.gz \
   ${RUN4}/1122_sed8_rep2/1122_sed8_rep2_R2.fastq.gz \
-  ${RAW_HOME}/1131_sed8_rep3_R2.fastq.gz \
-  ${RUN1}/1131_sed8_rep3/1131_sed8_rep3_R2.fastq.gz \
-  ${RUN2}/1131_sed8_rep3/1131_sed8_rep3_R2.fastq.gz \
-  > "${BASE_DIR}/01_raw_data/sed8/sed8_concat_R2.fastq.gz"
+ # ${RAW_HOME}/1131_sed8_rep3_R2.fastq.gz \
+ # ${RUN1}/1131_sed8_rep3/1131_sed8_rep3_R2.fastq.gz \
+ # ${RUN2}/1131_sed8_rep3/1131_sed8_rep3_R2.fastq.gz \
+  > "${BASE_DIR}/01_raw_data/sed8/sed8_run_3_4_concat_R2.fastq.gz"
 
 echo "Concaténation sed8 terminée."
 echo "Concaténation terminée pour tous les échantillons."
@@ -157,40 +162,42 @@ echo "Concaténation terminée pour tous les échantillons."
 # QUALITÉ + NETTOYAGE (FastQC, MultiQC, BBDuk, FastUniq, Clumpify, Fastp)
 ################################################################################
 for sample in "${SAMPLES[@]}"; do
-  # 1. Contrôle qualité RAW
-  fastqc ${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz ${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz -o ${BASE_DIR}/02_quality_check_raw/${sample} -t 4
-  multiqc ${BASE_DIR}/02_quality_check_raw/${sample} -o ${BASE_DIR}/02_quality_check_raw/${sample} --force
+  echo "Traitement de ${sample}..."
+  
+  # 1. Contrôle qualité RAW (optionnel pour le test)
+  # fastqc ${BASE_DIR}/01_raw_data/${sample}/${sample}${SUFFIX}_concat_R1.fastq.gz ${BASE_DIR}/01_raw_data/${sample}/${sample}${SUFFIX}_concat_R2.fastq.gz -o ${BASE_DIR}/02_quality_check_raw/${sample}${SUFFIX} -t 4
+  # multiqc ${BASE_DIR}/02_quality_check_raw/${sample}${SUFFIX} -o ${BASE_DIR}/02_quality_check_raw/${sample}${SUFFIX} --force
 
   # 2. Filtrage/adaptateurs BBDuk
-  $BBDUK in1=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz in2=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz out1=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz out2=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz ref=$PHIX ktrim=r k=23 mink=11 hdist=1 tpe tbo minlen=25 qtrim=r trimq=20 stats=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_stats.txt
-
+  $BBDUK in1=${BASE_DIR}/01_raw_data/${sample}/${sample}${SUFFIX}_concat_R1.fastq.gz in2=${BASE_DIR}/01_raw_data/${sample}/${sample}${SUFFIX}_concat_R2.fastq.gz out1=${BASE_DIR}/03_bbduk/${sample}/${sample}${SUFFIX}_bbduk_R1.fastq.gz out2=${BASE_DIR}/03_bbduk/${sample}/${sample}${SUFFIX}_bbduk_R2.fastq.gz ref=$PHIX ktrim=r k=23 mink=11 hdist=1 tpe tbo minlen=25 qtrim=r trimq=20 stats=${BASE_DIR}/03_bbduk/${sample}/${sample}${SUFFIX}_bbduk_stats.txt
+  
   # 3. Déduplication FastUniq
-  echo "FastUniq pour ${sample}..."
-  mkdir -p ${BASE_DIR}/04_fastuniq/${sample}/tmp
+  echo "FastUniq pour ${sample}${SUFFIX}..."
+  mkdir -p ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp
   # Décompresser les fichiers BBDuk
-  zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq
-  zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq
-  # Créer le fichier liste pour FastUniq (UN FICHIER PAR LIGNE, pas de tabulation)
-  echo "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq" > ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
-  echo "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq" >> ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
+  zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}${SUFFIX}_bbduk_R1.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp/${sample}${SUFFIX}_bbduk_R1.fastq
+  zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}${SUFFIX}_bbduk_R2.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp/${sample}${SUFFIX}_bbduk_R2.fastq
+  # Créer le fichier liste pour FastUniq
+  echo "${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp/${sample}${SUFFIX}_bbduk_R1.fastq" > ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp/infile.list
+  echo "${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp/${sample}${SUFFIX}_bbduk_R2.fastq" >> ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp/infile.list
   # Exécuter FastUniq
-  fastuniq -i ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list -t q -o ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq -p ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq
+  fastuniq -i ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp/infile.list -t q -o ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/${sample}${SUFFIX}_fastuniq_R1.fastq -p ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/${sample}${SUFFIX}_fastuniq_R2.fastq
   # Compresser les résultats
-  gzip ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq
-  gzip ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq
+  gzip ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/${sample}${SUFFIX}_fastuniq_R1.fastq
+  gzip ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/${sample}${SUFFIX}_fastuniq_R2.fastq
   # Nettoyer les fichiers temporaires
-  rm -rf ${BASE_DIR}/04_fastuniq/${sample}/tmp
-  echo "FastUniq terminé pour ${sample}."
+  rm -rf ${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/tmp
+  echo "FastUniq terminé pour ${sample}${SUFFIX}."
   
   # 4. Déduplication optique Clumpify
-  $CLUMPIFY in=${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq.gz in2=${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq.gz out=${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R1.fastq.gz out2=${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R2.fastq.gz dedupe=t
+  $CLUMPIFY in=${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/${sample}${SUFFIX}_fastuniq_R1.fastq.gz in2=${BASE_DIR}/04_fastuniq/${sample}${SUFFIX}/${sample}${SUFFIX}_fastuniq_R2.fastq.gz out=${BASE_DIR}/05_clumpify/${sample}${SUFFIX}/${sample}${SUFFIX}_clumpify_R1.fastq.gz out2=${BASE_DIR}/05_clumpify/${sample}${SUFFIX}/${sample}${SUFFIX}_clumpify_R2.fastq.gz dedupe=t
 
   # 5. Nettoyage et merge Fastp
-  fastp -i ${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R1.fastq.gz -I ${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R2.fastq.gz --merged_out ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_merged.fastq.gz --out1 ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_R1.fastq.gz --out2 ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_R2.fastq.gz --json ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp.json --html ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp.html --thread 4 --length_required 30 --qualified_quality_phred 20
+  fastp -i ${BASE_DIR}/05_clumpify/${sample}${SUFFIX}/${sample}${SUFFIX}_clumpify_R1.fastq.gz -I ${BASE_DIR}/05_clumpify/${sample}${SUFFIX}/${sample}${SUFFIX}_clumpify_R2.fastq.gz --merged_out ${BASE_DIR}/06_fastp/${sample}${SUFFIX}/${sample}${SUFFIX}_fastp_merged.fastq.gz --out1 ${BASE_DIR}/06_fastp/${sample}${SUFFIX}/${sample}${SUFFIX}_fastp_R1.fastq.gz --out2 ${BASE_DIR}/06_fastp/${sample}${SUFFIX}/${sample}${SUFFIX}_fastp_R2.fastq.gz --json ${BASE_DIR}/06_fastp/${sample}${SUFFIX}/${sample}${SUFFIX}_fastp.json --html ${BASE_DIR}/06_fastp/${sample}${SUFFIX}/${sample}${SUFFIX}_fastp.html --thread 4 --length_required 30 --qualified_quality_phred 20
 
   # 6. Contrôle qualité Clean
-  fastqc ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_*.fastq.gz -o ${BASE_DIR}/07_quality_check_clean/${sample} -t 4
-  multiqc ${BASE_DIR}/07_quality_check_clean/${sample} -o ${BASE_DIR}/07_quality_check_clean/${sample} --force
+  fastqc ${BASE_DIR}/06_fastp/${sample}${SUFFIX}/${sample}${SUFFIX}_fastp_*.fastq.gz -o ${BASE_DIR}/07_quality_check_clean/${sample}${SUFFIX} -t 4
+  multiqc ${BASE_DIR}/07_quality_check_clean/${sample}${SUFFIX} -o ${BASE_DIR}/07_quality_check_clean/${sample}${SUFFIX} --force
 
 done
 
@@ -201,16 +208,16 @@ done
 echo "Classification taxonomique Kraken2..."
 
 for sample in "${SAMPLES[@]}"; do
-  echo "Kraken2 pour ${sample}..."
-  FASTPDIR="${BASE_DIR}/06_fastp/${sample}"
-  OUTDIR="${BASE_DIR}/08_kraken2/${sample}"
+  echo "Kraken2 pour ${sample}${SUFFIX}..."
+  FASTPDIR="${BASE_DIR}/06_fastp/${sample}${SUFFIX}"
+  OUTDIR="${BASE_DIR}/08_kraken2/${sample}${SUFFIX}${SUFFIX}"
   
   # Analyse des reads merged
-  MERGED="${FASTPDIR}/${sample}_fastp_merged.fastq.gz"
+  MERGED="${FASTPDIR}/${sample}${SUFFIX}_fastp_merged.fastq.gz"
   if [ -f "$MERGED" ]; then
-    OUTKRAKEN="${OUTDIR}/${sample}_merged.kraken"
-    OUTREPORT="${OUTDIR}/${sample}_merged.report"
-    echo "  ${sample} merged..."
+    OUTKRAKEN="${OUTDIR}/${sample}${SUFFIX}_merged.kraken"
+    OUTREPORT="${OUTDIR}/${sample}${SUFFIX}_merged.report"
+    echo "  ${sample}${SUFFIX} merged..."
     kraken2 --confidence 0.2 \
       --db ${KRAKEN2_DB} \
       --threads ${THREADS} \
@@ -220,12 +227,12 @@ for sample in "${SAMPLES[@]}"; do
   fi
   
   # Analyse des reads unmerged (paired)
-  R1="${FASTPDIR}/${sample}_fastp_R1.fastq.gz"
-  R2="${FASTPDIR}/${sample}_fastp_R2.fastq.gz"
+  R1="${FASTPDIR}/${sample}${SUFFIX}_fastp_R1.fastq.gz"
+  R2="${FASTPDIR}/${sample}${SUFFIX}_fastp_R2.fastq.gz"
   if [ -f "$R1" ] && [ -f "$R2" ]; then
-    OUTKRAKEN="${OUTDIR}/${sample}_unmerged.kraken"
-    OUTREPORT="${OUTDIR}/${sample}_unmerged.report"
-    echo "  ${sample} unmerged..."
+    OUTKRAKEN="${OUTDIR}/${sample}${SUFFIX}_unmerged.kraken"
+    OUTREPORT="${OUTDIR}/${sample}${SUFFIX}_unmerged.report"
+    echo "  ${sample}${SUFFIX} unmerged..."
     kraken2 --confidence 0.2 \
       --paired \
       --db ${KRAKEN2_DB} \
@@ -235,6 +242,7 @@ for sample in "${SAMPLES[@]}"; do
       ${R1} ${R2}
   fi
 done
+
 
 echo "Classification Kraken2 terminée."
 
@@ -255,7 +263,7 @@ fi
 
 for sample in "${SAMPLES[@]}"; do
   echo "Krona pour ${sample}..."
-  INDIR="${BASE_DIR}/08_kraken2/${sample}"
+  INDIR="${BASE_DIR}/08_kraken2/${sample}${SUFFIX}"
   OUTDIR="${BASE_DIR}/09_krona/${sample}"
   
   cd "${INDIR}"
@@ -268,7 +276,7 @@ for sample in "${SAMPLES[@]}"; do
 ################################################################################
 
 for sample in "${SAMPLES[@]}"; do
-  KRAKENDIR="${BASE_DIR}/08_kraken2/${sample}"
+  KRAKENDIR="${BASE_DIR}/08_kraken2/${sample}${SUFFIX}"
   MPA_DIR="${BASE_DIR}/10_mpa_tables/${sample}"
   mkdir -p "$MPA_DIR"
   declare -a mpafiles
@@ -312,13 +320,14 @@ extract_fastq_stats() {
 # Extraction pour chaque sample après étapes majeures
 for sample in "${SAMPLES[@]}"; do
   RAW_DIR="${BASE_DIR}/01_raw_data/${sample}"
-  FASTP_DIR="${BASE_DIR}/06_fastp/${sample}"
-  extract_fastq_stats "${RAW_DIR}/${sample}_concat_R1.fastq.gz" "$sample" "RAW_R1"
-  extract_fastq_stats "${RAW_DIR}/${sample}_concat_R2.fastq.gz" "$sample" "RAW_R2"
-  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_R1.fastq.gz" "$sample" "Clean_R1"
-  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_R2.fastq.gz" "$sample" "Clean_R2"
-  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_merged.fastq.gz" "$sample" "Clean_Merged"
+  FASTP_DIR="${BASE_DIR}/06_fastp/${sample}${SUFFIX}"
+  extract_fastq_stats "${RAW_DIR}/${sample}${SUFFIX}_concat_R1.fastq.gz" "${sample}${SUFFIX}" "RAW_R1"
+  extract_fastq_stats "${RAW_DIR}/${sample}${SUFFIX}_concat_R2.fastq.gz" "${sample}${SUFFIX}" "RAW_R2"
+  extract_fastq_stats "${FASTP_DIR}/${sample}${SUFFIX}_fastp_R1.fastq.gz" "${sample}${SUFFIX}" "Clean_R1"
+  extract_fastq_stats "${FASTP_DIR}/${sample}${SUFFIX}_fastp_R2.fastq.gz" "${sample}${SUFFIX}" "Clean_R2"
+  extract_fastq_stats "${FASTP_DIR}/${sample}${SUFFIX}_fastp_merged.fastq.gz" "${sample}${SUFFIX}" "Clean_Merged"
 done
+
 
 echo "Tableau récapitulatif généré: $SUMMARY_TABLE"
 
@@ -335,9 +344,9 @@ echo ""
 
 KRAKENBASE="${BASE_DIR}/08_kraken2"
 FASTQBASE="${BASE_DIR}/06_fastp"
-DAMAGEBASE="${BASE_DIR}/12_mapdamage"
-LOGFILE="${BASE_DIR}/00_scripts/mapdamage_$(date +%Y%m%d_%H%M%S).txt"
-MAPPINGINFO="${BASE_DIR}/11_summary_tables/mapping_bwa_info.tsv"
+DAMAGEBASE="${BASE_DIR}/12_mapdamage${SUFFIX}"  # Ajouter le suffixe ici aussi
+LOGFILE="${BASE_DIR}/00_scripts/mapdamage${SUFFIX}_$(date +%Y%m%d_%H%M%S).txt"
+MAPPINGINFO="${BASE_DIR}/11_summary_tables/mapping_bwa_info${SUFFIX}.tsv"
 
 mkdir -p "${DAMAGEBASE}"
 
@@ -404,8 +413,8 @@ for sample in "${SAMPLES[@]}"; do
   echo "Traitement de l'échantillon: $sample"
   echo "======================================================================"
 
-  KRAKENDIR="${KRAKENBASE}/${sample}"
-  FASTQDIR="${FASTQBASE}/${sample}"
+  KRAKENDIR="${KRAKENBASE}/${sample}${SUFFIX}"
+  FASTQDIR="${FASTQBASE}/${sample}${SUFFIX}"
 
   if [ ! -d "$KRAKENDIR" ]; then
     echo "ATTENTION: Répertoire Kraken2 absent pour $sample" | tee -a "${LOGFILE}"
