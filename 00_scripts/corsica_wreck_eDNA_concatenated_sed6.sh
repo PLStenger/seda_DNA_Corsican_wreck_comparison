@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=corsica_wreck_eDNA_concatenated
+#SBATCH --job-name=corsica_wreck_eDNA_concatenated_sed6
 #SBATCH --ntasks=1
 #SBATCH -p smp
 #SBATCH --mem=1000G
 #SBATCH --mail-user=pierrelouis.stenger@gmail.com
 #SBATCH --mail-type=ALL
-#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_comparison/00_scripts/corsica_wreck_eDNA_concatenated.err"
-#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_comparison/00_scripts/corsica_wreck_eDNA_concatenated.out"
+#SBATCH --error="/home/plstenge/seda_DNA_Corsican_wreck_comparison/00_scripts/corsica_wreck_eDNA_concatenated_sed6.err"
+#SBATCH --output="/home/plstenge/seda_DNA_Corsican_wreck_comparison/00_scripts/corsica_wreck_eDNA_concatenated_sed6.out"
 
 ################################################################################
 # Pipeline aDNA - Projet Corsica Wreck (concaténation par échantillon)
