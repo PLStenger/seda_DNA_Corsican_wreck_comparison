@@ -152,91 +152,91 @@ done
 #
 #echo "Concaténation sed8 terminée."
 #echo "Concaténation terminée pour tous les échantillons."
-
-################################################################################
-# QUALITÉ + NETTOYAGE (FastQC, MultiQC, BBDuk, FastUniq, Clumpify, Fastp)
-################################################################################
-for sample in "${SAMPLES[@]}"; do
-  # 1. Contrôle qualité RAW
- # fastqc ${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz ${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz -o ${BASE_DIR}/02_quality_check_raw/${sample} -t 4
- # multiqc ${BASE_DIR}/02_quality_check_raw/${sample} -o ${BASE_DIR}/02_quality_check_raw/${sample} --force
-
-  # 2. Filtrage/adaptateurs BBDuk
-  $BBDUK in1=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz in2=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz out1=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz out2=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz ref=$PHIX ktrim=r k=23 mink=11 hdist=1 tpe tbo minlen=25 qtrim=r trimq=20 stats=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_stats.txt
-
-  # 3. Déduplication FastUniq
-  echo "FastUniq pour ${sample}..."
-  mkdir -p ${BASE_DIR}/04_fastuniq/${sample}/tmp
-  # Décompresser les fichiers BBDuk
-  zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq
-  zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq
-  # Créer le fichier liste pour FastUniq (UN FICHIER PAR LIGNE, pas de tabulation)
-  echo "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq" > ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
-  echo "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq" >> ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
-  # Exécuter FastUniq
-  fastuniq -i ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list -t q -o ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq -p ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq
-  # Compresser les résultats
-  gzip ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq
-  gzip ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq
-  # Nettoyer les fichiers temporaires
-  rm -rf ${BASE_DIR}/04_fastuniq/${sample}/tmp
-  echo "FastUniq terminé pour ${sample}."
-  
-  # 4. Déduplication optique Clumpify
-  $CLUMPIFY in=${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq.gz in2=${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq.gz out=${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R1.fastq.gz out2=${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R2.fastq.gz dedupe=t
-
-  # 5. Nettoyage et merge Fastp
-  fastp -i ${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R1.fastq.gz -I ${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R2.fastq.gz --merged_out ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_merged.fastq.gz --out1 ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_R1.fastq.gz --out2 ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_R2.fastq.gz --json ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp.json --html ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp.html --thread 4 --length_required 30 --qualified_quality_phred 20
-
-  # 6. Contrôle qualité Clean
-  fastqc ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_*.fastq.gz -o ${BASE_DIR}/07_quality_check_clean/${sample} -t 4
-  multiqc ${BASE_DIR}/07_quality_check_clean/${sample} -o ${BASE_DIR}/07_quality_check_clean/${sample} --force
-
-done
-
-
-################################################################################
-# KRAKEN2: CLASSIFICATION TAXONOMIQUE
-################################################################################
-echo "Classification taxonomique Kraken2..."
-
-for sample in "${SAMPLES[@]}"; do
-  echo "Kraken2 pour ${sample}..."
-  FASTPDIR="${BASE_DIR}/06_fastp/${sample}"
-  OUTDIR="${BASE_DIR}/08_kraken2/${sample}"
-  
-  # Analyse des reads merged
-  MERGED="${FASTPDIR}/${sample}_fastp_merged.fastq.gz"
-  if [ -f "$MERGED" ]; then
-    OUTKRAKEN="${OUTDIR}/${sample}_merged.kraken"
-    OUTREPORT="${OUTDIR}/${sample}_merged.report"
-    echo "  ${sample} merged..."
-    kraken2 --confidence 0.2 \
-      --db ${KRAKEN2_DB} \
-      --threads ${THREADS} \
-      --output ${OUTKRAKEN} \
-      --report ${OUTREPORT} \
-      ${MERGED}
-  fi
-  
-  # Analyse des reads unmerged (paired)
-  R1="${FASTPDIR}/${sample}_fastp_R1.fastq.gz"
-  R2="${FASTPDIR}/${sample}_fastp_R2.fastq.gz"
-  if [ -f "$R1" ] && [ -f "$R2" ]; then
-    OUTKRAKEN="${OUTDIR}/${sample}_unmerged.kraken"
-    OUTREPORT="${OUTDIR}/${sample}_unmerged.report"
-    echo "  ${sample} unmerged..."
-    kraken2 --confidence 0.2 \
-      --paired \
-      --db ${KRAKEN2_DB} \
-      --threads ${THREADS} \
-      --output ${OUTKRAKEN} \
-      --report ${OUTREPORT} \
-      ${R1} ${R2}
-  fi
-done
-
-echo "Classification Kraken2 terminée."
+#
+#################################################################################
+## QUALITÉ + NETTOYAGE (FastQC, MultiQC, BBDuk, FastUniq, Clumpify, Fastp)
+#################################################################################
+#for sample in "${SAMPLES[@]}"; do
+#  # 1. Contrôle qualité RAW
+# # fastqc ${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz ${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz -o ${BASE_DIR}/02_quality_check_raw/${sample} -t 4
+# # multiqc ${BASE_DIR}/02_quality_check_raw/${sample} -o ${BASE_DIR}/02_quality_check_raw/${sample} --force
+#
+#  # 2. Filtrage/adaptateurs BBDuk
+#  $BBDUK in1=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R1.fastq.gz in2=${BASE_DIR}/01_raw_data/${sample}/${sample}_concat_R2.fastq.gz out1=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz out2=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz ref=$PHIX ktrim=r k=23 mink=11 hdist=1 tpe tbo minlen=25 qtrim=r trimq=20 stats=${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_stats.txt
+#
+#  # 3. Déduplication FastUniq
+#  echo "FastUniq pour ${sample}..."
+#  mkdir -p ${BASE_DIR}/04_fastuniq/${sample}/tmp
+#  # Décompresser les fichiers BBDuk
+#  zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R1.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq
+#  zcat ${BASE_DIR}/03_bbduk/${sample}/${sample}_bbduk_R2.fastq.gz > ${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq
+#  # Créer le fichier liste pour FastUniq (UN FICHIER PAR LIGNE, pas de tabulation)
+#  echo "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R1.fastq" > ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
+#  echo "${BASE_DIR}/04_fastuniq/${sample}/tmp/${sample}_bbduk_R2.fastq" >> ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list
+#  # Exécuter FastUniq
+#  fastuniq -i ${BASE_DIR}/04_fastuniq/${sample}/tmp/infile.list -t q -o ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq -p ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq
+#  # Compresser les résultats
+#  gzip ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq
+#  gzip ${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq
+#  # Nettoyer les fichiers temporaires
+#  rm -rf ${BASE_DIR}/04_fastuniq/${sample}/tmp
+#  echo "FastUniq terminé pour ${sample}."
+#  
+#  # 4. Déduplication optique Clumpify
+#  $CLUMPIFY in=${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R1.fastq.gz in2=${BASE_DIR}/04_fastuniq/${sample}/${sample}_fastuniq_R2.fastq.gz out=${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R1.fastq.gz out2=${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R2.fastq.gz dedupe=t
+#
+#  # 5. Nettoyage et merge Fastp
+#  fastp -i ${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R1.fastq.gz -I ${BASE_DIR}/05_clumpify/${sample}/${sample}_clumpify_R2.fastq.gz --merged_out ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_merged.fastq.gz --out1 ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_R1.fastq.gz --out2 ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_R2.fastq.gz --json ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp.json --html ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp.html --thread 4 --length_required 30 --qualified_quality_phred 20
+#
+#  # 6. Contrôle qualité Clean
+#  fastqc ${BASE_DIR}/06_fastp/${sample}/${sample}_fastp_*.fastq.gz -o ${BASE_DIR}/07_quality_check_clean/${sample} -t 4
+#  multiqc ${BASE_DIR}/07_quality_check_clean/${sample} -o ${BASE_DIR}/07_quality_check_clean/${sample} --force
+#
+#done
+#
+#
+#################################################################################
+## KRAKEN2: CLASSIFICATION TAXONOMIQUE
+#################################################################################
+#echo "Classification taxonomique Kraken2..."
+#
+#for sample in "${SAMPLES[@]}"; do
+#  echo "Kraken2 pour ${sample}..."
+#  FASTPDIR="${BASE_DIR}/06_fastp/${sample}"
+#  OUTDIR="${BASE_DIR}/08_kraken2/${sample}"
+#  
+#  # Analyse des reads merged
+#  MERGED="${FASTPDIR}/${sample}_fastp_merged.fastq.gz"
+#  if [ -f "$MERGED" ]; then
+#    OUTKRAKEN="${OUTDIR}/${sample}_merged.kraken"
+#    OUTREPORT="${OUTDIR}/${sample}_merged.report"
+#    echo "  ${sample} merged..."
+#    kraken2 --confidence 0.2 \
+#      --db ${KRAKEN2_DB} \
+#      --threads ${THREADS} \
+#      --output ${OUTKRAKEN} \
+#      --report ${OUTREPORT} \
+#      ${MERGED}
+#  fi
+#  
+#  # Analyse des reads unmerged (paired)
+#  R1="${FASTPDIR}/${sample}_fastp_R1.fastq.gz"
+#  R2="${FASTPDIR}/${sample}_fastp_R2.fastq.gz"
+#  if [ -f "$R1" ] && [ -f "$R2" ]; then
+#    OUTKRAKEN="${OUTDIR}/${sample}_unmerged.kraken"
+#    OUTREPORT="${OUTDIR}/${sample}_unmerged.report"
+#    echo "  ${sample} unmerged..."
+#    kraken2 --confidence 0.2 \
+#      --paired \
+#      --db ${KRAKEN2_DB} \
+#      --threads ${THREADS} \
+#      --output ${OUTKRAKEN} \
+#      --report ${OUTREPORT} \
+#      ${R1} ${R2}
+#  fi
+#done
+#
+#echo "Classification Kraken2 terminée."
 
 ################################################################################
 # KRONA: VISUALISATION
@@ -244,10 +244,13 @@ echo "Classification Kraken2 terminée."
 echo "Visualisation Krona..."
 
 # Vérifier si la taxonomie Krona est installée
-KRONA_TAX_DIR=$(conda env list | grep metagenomics | awk '{print $NF}')/opt/krona/taxonomy
-if [ ! -d "$KRONA_TAX_DIR" ] || [ ! -f "$KRONA_TAX_DIR/taxonomy.tab" ]; then
+CONDA_PREFIX=$(conda info --base)/envs/metagenomics
+KRONA_TAX_DIR="${CONDA_PREFIX}/opt/krona/taxonomy"
+
+# Vérifier si la taxonomie Krona est installée
+if [ ! -d "${KRONA_TAX_DIR}" ] || [ ! -f "${KRONA_TAX_DIR}/taxonomy.tab" ]; then
   echo "Taxonomie Krona absente. Installation en cours..."
-  ktUpdateTaxonomy.sh "$KRONA_TAX_DIR"
+  ktUpdateTaxonomy.sh "${KRONA_TAX_DIR}"
   echo "Taxonomie Krona installée avec succès."
 else
   echo "Taxonomie Krona déjà installée."
@@ -261,7 +264,13 @@ for sample in "${SAMPLES[@]}"; do
   cd "${INDIR}"
   
   # Krona combiné pour tous les fichiers report du sample
-  if ls *.report
+  if ls *.report > /dev/null 2>&1; then
+    ktImportTaxonomy *.report -o "${sample}${SUFFIX}_krona.html"
+    echo "Krona HTML généré pour ${sample}${SUFFIX}"
+  else
+    echo "Aucun fichier report trouvé pour ${sample}${SUFFIX}"
+  fi
+
 
 ################################################################################
 # ÉTAPE 9: Créer des tables MPA à partir de Kraken2 reports
