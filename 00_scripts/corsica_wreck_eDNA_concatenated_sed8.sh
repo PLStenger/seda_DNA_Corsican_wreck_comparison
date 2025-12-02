@@ -243,11 +243,9 @@ done
 ################################################################################
 echo "Visualisation Krona..."
 
-# Vérifier si la taxonomie Krona est installée
 CONDA_PREFIX=$(conda info --base)/envs/metagenomics
 KRONA_TAX_DIR="${CONDA_PREFIX}/opt/krona/taxonomy"
 
-# Vérifier si la taxonomie Krona est installée
 if [ ! -d "${KRONA_TAX_DIR}" ] || [ ! -f "${KRONA_TAX_DIR}/taxonomy.tab" ]; then
   echo "Taxonomie Krona absente. Installation en cours..."
   ktUpdateTaxonomy.sh "${KRONA_TAX_DIR}"
@@ -256,20 +254,17 @@ else
   echo "Taxonomie Krona déjà installée."
 fi
 
-for sample in "${SAMPLES[@]}"; do
-  echo "Krona pour ${sample}..."
-  INDIR="${BASE_DIR}/08_kraken2/${sample}"
-  OUTDIR="${BASE_DIR}/09_krona/${sample}"
-  
+INDIR="${BASE_DIR}/08_kraken2/${SAMPLE}${SUFFIX}"
+OUTDIR="${BASE_DIR}/09_krona/${SAMPLE}${SUFFIX}"
+
+if [ -d "$INDIR" ] && ls ${INDIR}/*.report > /dev/null 2>&1; then
   cd "${INDIR}"
-  
-  # Krona combiné pour tous les fichiers report du sample
-  if ls *.report > /dev/null 2>&1; then
-    ktImportTaxonomy *.report -o "${sample}${SUFFIX}_krona.html"
-    echo "Krona HTML généré pour ${sample}${SUFFIX}"
-  else
-    echo "Aucun fichier report trouvé pour ${sample}${SUFFIX}"
-  fi
+  ktImportTaxonomy *.report -o "${OUTDIR}/${SAMPLE}${SUFFIX}_krona.html"
+  echo "Krona HTML généré pour ${SAMPLE}${SUFFIX}"
+else
+  echo "Aucun fichier report trouvé pour ${SAMPLE}${SUFFIX}"
+fi
+
 
 ################################################################################
 # ÉTAPE 9: Créer des tables MPA à partir de Kraken2 reports
