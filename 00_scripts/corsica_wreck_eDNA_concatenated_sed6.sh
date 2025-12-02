@@ -237,93 +237,93 @@ done
 #done
 #
 #echo "Classification Kraken2 terminée."
-
-################################################################################
-# KRONA: VISUALISATION
-################################################################################
-echo "Visualisation Krona..."
-
-CONDA_PREFIX=$(conda info --base)/envs/metagenomics
-KRONA_TAX_DIR="${CONDA_PREFIX}/opt/krona/taxonomy"
-
-if [ ! -d "${KRONA_TAX_DIR}" ] || [ ! -f "${KRONA_TAX_DIR}/taxonomy.tab" ]; then
-  echo "Taxonomie Krona absente. Installation en cours..."
-  ktUpdateTaxonomy.sh "${KRONA_TAX_DIR}"
-  echo "Taxonomie Krona installée avec succès."
-else
-  echo "Taxonomie Krona déjà installée."
-fi
-
-INDIR="${BASE_DIR}/08_kraken2/${SAMPLE}${SUFFIX}"
-OUTDIR="${BASE_DIR}/09_krona/${SAMPLE}${SUFFIX}"
-
-if [ -d "$INDIR" ] && ls ${INDIR}/*.report > /dev/null 2>&1; then
-  cd "${INDIR}"
-  ktImportTaxonomy *.report -o "${OUTDIR}/${SAMPLE}${SUFFIX}_krona.html"
-  echo "Krona HTML généré pour ${SAMPLE}${SUFFIX}"
-else
-  echo "Aucun fichier report trouvé pour ${SAMPLE}${SUFFIX}"
-fi
-
-
-################################################################################
-# ÉTAPE 9: Créer des tables MPA à partir de Kraken2 reports
-################################################################################
-
-for sample in "${SAMPLES[@]}"; do
-  KRAKENDIR="${BASE_DIR}/08_kraken2/${sample}"
-  MPA_DIR="${BASE_DIR}/10_mpa_tables/${sample}"
-  mkdir -p "$MPA_DIR"
-  declare -a mpafiles
-
-  for report in ${KRAKENDIR}/*.report; do
-    if [ -f "$report" ]; then
-      base=$(basename "$report" .report)
-      mpafile="${MPA_DIR}/${base}.mpa"
-      python3 ${KRAKENTOOLS_DIR}/kreport2mpa.py -r "$report" -o "$mpafile"
-      mpafiles+=("$mpafile")
-    fi
-  done
-
-  if [ ${#mpafiles[@]} -gt 0 ]; then
-    python3 ${KRAKENTOOLS_DIR}/combine_mpa.py -i ${mpafiles[*]} -o ${MPA_DIR}/combined_${sample}.tsv
-  fi
-  echo "Tables MPA générées pour $sample."
-done
-
-################################################################################
-# ÉTAPE 10: Créer un tableau récapitulatif des séquences après chaque étape clé
-################################################################################
-
-SUMMARY_TABLE="${BASE_DIR}/11_summary_tables/sequences_summary.tsv"
-echo -e "Sample\tStage\tNbSequences\tAvgLength\tGCpercent" > $SUMMARY_TABLE
-# Fonction pour extraire stats d'un fastq.gz
-extract_fastq_stats() {
-  local fq=$1
-  local sample=$2
-  local stage=$3
-  if [ ! -f "$fq" ]; then return; fi
-  # Nombre de reads
-  nb=$(zcat "$fq" | echo $((`wc -l`/4)))
-  # Moyenne de longueur
-  avg=$(zcat "$fq" | awk 'NR%4==2 {sum+=length($1); n++} END {if(n>0) print sum/n; else print 0}')
-  # %GC
-  gc=$(zcat "$fq" | awk 'NR%4==2 {gc+=gsub(/[GCgc]/,"&") ; t+=length($1)} END {if(t>0) printf "%.2f", 100*gc/t; else print 0}')
-  echo -e "$sample\t$stage\t$nb\t$avg\t$gc" >> $SUMMARY_TABLE
-}
-
-# Extraction pour chaque sample après étapes majeures
-for sample in "${SAMPLES[@]}"; do
-  RAW_DIR="${BASE_DIR}/01_raw_data/${sample}"
-  FASTP_DIR="${BASE_DIR}/06_fastp/${sample}"
-  extract_fastq_stats "${RAW_DIR}/${sample}_concat_R1.fastq.gz" "$sample" "RAW_R1"
-  extract_fastq_stats "${RAW_DIR}/${sample}_concat_R2.fastq.gz" "$sample" "RAW_R2"
-  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_R1.fastq.gz" "$sample" "Clean_R1"
-  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_R2.fastq.gz" "$sample" "Clean_R2"
-  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_merged.fastq.gz" "$sample" "Clean_Merged"
-done
-
-echo "Tableau récapitulatif généré: $SUMMARY_TABLE"
+#
+#################################################################################
+## KRONA: VISUALISATION
+#################################################################################
+#echo "Visualisation Krona..."
+#
+#CONDA_PREFIX=$(conda info --base)/envs/metagenomics
+#KRONA_TAX_DIR="${CONDA_PREFIX}/opt/krona/taxonomy"
+#
+#if [ ! -d "${KRONA_TAX_DIR}" ] || [ ! -f "${KRONA_TAX_DIR}/taxonomy.tab" ]; then
+#  echo "Taxonomie Krona absente. Installation en cours..."
+#  ktUpdateTaxonomy.sh "${KRONA_TAX_DIR}"
+#  echo "Taxonomie Krona installée avec succès."
+#else
+#  echo "Taxonomie Krona déjà installée."
+#fi
+#
+#INDIR="${BASE_DIR}/08_kraken2/${SAMPLE}${SUFFIX}"
+#OUTDIR="${BASE_DIR}/09_krona/${SAMPLE}${SUFFIX}"
+#
+#if [ -d "$INDIR" ] && ls ${INDIR}/*.report > /dev/null 2>&1; then
+#  cd "${INDIR}"
+#  ktImportTaxonomy *.report -o "${OUTDIR}/${SAMPLE}${SUFFIX}_krona.html"
+#  echo "Krona HTML généré pour ${SAMPLE}${SUFFIX}"
+#else
+#  echo "Aucun fichier report trouvé pour ${SAMPLE}${SUFFIX}"
+#fi
+#
+#
+#################################################################################
+## ÉTAPE 9: Créer des tables MPA à partir de Kraken2 reports
+#################################################################################
+#
+#for sample in "${SAMPLES[@]}"; do
+#  KRAKENDIR="${BASE_DIR}/08_kraken2/${sample}"
+#  MPA_DIR="${BASE_DIR}/10_mpa_tables/${sample}"
+#  mkdir -p "$MPA_DIR"
+#  declare -a mpafiles
+#
+#  for report in ${KRAKENDIR}/*.report; do
+#    if [ -f "$report" ]; then
+#      base=$(basename "$report" .report)
+#      mpafile="${MPA_DIR}/${base}.mpa"
+#      python3 ${KRAKENTOOLS_DIR}/kreport2mpa.py -r "$report" -o "$mpafile"
+#      mpafiles+=("$mpafile")
+#    fi
+#  done
+#
+#  if [ ${#mpafiles[@]} -gt 0 ]; then
+#    python3 ${KRAKENTOOLS_DIR}/combine_mpa.py -i ${mpafiles[*]} -o ${MPA_DIR}/combined_${sample}.tsv
+#  fi
+#  echo "Tables MPA générées pour $sample."
+#done
+#
+#################################################################################
+## ÉTAPE 10: Créer un tableau récapitulatif des séquences après chaque étape clé
+#################################################################################
+#
+#SUMMARY_TABLE="${BASE_DIR}/11_summary_tables/sequences_summary.tsv"
+#echo -e "Sample\tStage\tNbSequences\tAvgLength\tGCpercent" > $SUMMARY_TABLE
+## Fonction pour extraire stats d'un fastq.gz
+#extract_fastq_stats() {
+#  local fq=$1
+#  local sample=$2
+#  local stage=$3
+#  if [ ! -f "$fq" ]; then return; fi
+#  # Nombre de reads
+#  nb=$(zcat "$fq" | echo $((`wc -l`/4)))
+#  # Moyenne de longueur
+#  avg=$(zcat "$fq" | awk 'NR%4==2 {sum+=length($1); n++} END {if(n>0) print sum/n; else print 0}')
+#  # %GC
+#  gc=$(zcat "$fq" | awk 'NR%4==2 {gc+=gsub(/[GCgc]/,"&") ; t+=length($1)} END {if(t>0) printf "%.2f", 100*gc/t; else print 0}')
+#  echo -e "$sample\t$stage\t$nb\t$avg\t$gc" >> $SUMMARY_TABLE
+#}
+#
+## Extraction pour chaque sample après étapes majeures
+#for sample in "${SAMPLES[@]}"; do
+#  RAW_DIR="${BASE_DIR}/01_raw_data/${sample}"
+#  FASTP_DIR="${BASE_DIR}/06_fastp/${sample}"
+#  extract_fastq_stats "${RAW_DIR}/${sample}_concat_R1.fastq.gz" "$sample" "RAW_R1"
+#  extract_fastq_stats "${RAW_DIR}/${sample}_concat_R2.fastq.gz" "$sample" "RAW_R2"
+#  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_R1.fastq.gz" "$sample" "Clean_R1"
+#  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_R2.fastq.gz" "$sample" "Clean_R2"
+#  extract_fastq_stats "${FASTP_DIR}/${sample}_fastp_merged.fastq.gz" "$sample" "Clean_Merged"
+#done
+#
+#echo "Tableau récapitulatif généré: $SUMMARY_TABLE"
 
 ################################################################################
 # ÉTAPE 11: MAPDAMAGE - ANALYSE DES DOMMAGES DE L'ADN ANCIEN
@@ -344,10 +344,10 @@ MAPPINGINFO="${BASE_DIR}/11_summary_tables/mapping_bwa_info.tsv"
 
 mkdir -p "${DAMAGEBASE}"
 
-# Activer l'environnement MapDamage
+# Activer l'environnement mapdamage_py39
 #module load conda/4.12.0
 #source ~/.bashrc
-conda activate mapdamagepy39
+conda activate mapdamage_py39
 
 echo "Script MapDamage started at $(date)" | tee -a "${LOGFILE}"
 
