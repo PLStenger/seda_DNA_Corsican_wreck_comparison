@@ -26,7 +26,7 @@ BBDUK="/home/plstenge/bbmap/bbduk.sh"
 CLUMPIFY="/home/plstenge/bbmap/clumpify.sh"
 PHIX="/home/plstenge/bbmap/resources/phix174_ill.ref.fa.gz"
 KRAKEN2_DB="/home/plstenge/k2_core_nt_20250609"
-KRAKENTOOLS_DIR="${BASE_DIR}/08_kraken2/KrakenTools"
+KRAKENTOOLS_DIR="/home/plstenge/coprolites/07_kraken2/KrakenTools"
 THREADS=36
 
 RAW_HOME="/home/plstenge/seda_DNA_Corsican_wreck/01_raw_data"
