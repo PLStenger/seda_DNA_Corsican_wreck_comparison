@@ -347,7 +347,7 @@ mkdir -p "${DAMAGEBASE}"
 # Activer l'environnement MapDamage
 #module load conda/4.12.0
 #source ~/.bashrc
-conda activate mapdamagepy39
+conda activate mapdamage_py39
 
 echo "Script MapDamage started at $(date)" | tee -a "${LOGFILE}"
 
