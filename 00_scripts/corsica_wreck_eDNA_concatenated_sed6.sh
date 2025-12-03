@@ -368,12 +368,12 @@ declare -A TAXONS=(
 ################################################################################
 # INDEXATION BWA DES GÉNOMES DE RÉFÉRENCE
 ################################################################################
-echo "Vérification des index BWA..."
-bwa index /storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa
-#bwa index /storage/biodatabanks/ucsc/genomes/hg19/Homo_sapiens-hg19_2012-9-19/fasta/all.fasta
-bwa index /home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa
-bwa index /home/plstenge/genomes/Melanogrammus_aeglefinus_OLKM01.fasta
-bwa index /home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fast
+echo "Vérification des index BWA..." # A ne faire qu'une fois !
+#bwa index /storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa
+##bwa index /storage/biodatabanks/ucsc/genomes/hg19/Homo_sapiens-hg19_2012-9-19/fasta/all.fasta
+#bwa index /home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa
+#bwa index /home/plstenge/genomes/Melanogrammus_aeglefinus_OLKM01.fasta
+#bwa index /home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fast
 
 ################################################################################
 # FONCTION POUR CALCULER LE TAUX DE MAPPING
