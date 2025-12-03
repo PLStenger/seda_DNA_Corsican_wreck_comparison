@@ -358,7 +358,7 @@ echo -e "Sample\tSpecies\tType\tTotalReads\tMappedReads\tMappingRate" > "${MAPPI
 # DÉFINITION DES GÉNOMES DE RÉFÉRENCE (TAXONS MODIFIÉS)
 ################################################################################
 declare -A TAXONS=(
-  ["Vitis_vinifera"]="29760:/storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa"
+ # ["Vitis_vinifera"]="29760:/storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa"
   ["Mus_musculus"]="10090:/home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa"
   ["Melanogrammus_aeglefinus"]="8056:/home/plstenge/genomes/Melanogrammus_aeglefinus_OLKM01.fasta"
   ["Gobiusculus_flavescens"]="257540:/home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fasta"
