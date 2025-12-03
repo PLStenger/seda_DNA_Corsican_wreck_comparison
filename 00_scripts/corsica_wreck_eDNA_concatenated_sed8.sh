@@ -362,7 +362,7 @@ declare -A TAXONS=(
  # ["Homo_sapiens"]="9606:/storage/biodatabanks/ucsc/genomes/hg19/Homo_sapiens-hg19_2012-9-19/fasta/all.fasta"
   ["Mus_musculus"]="10090:/home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa"
   ["Melanogrammus_aeglefinus"]="8056:/home/plstenge/genomes/Melanogrammus_aeglefinus_OLKM01.fasta"
-  ["Gobiusculus_flavescens"]="257540:/home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fast"
+  ["Gobiusculus_flavescens"]="257540:/home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fasta"
 )
 
 ################################################################################
@@ -373,7 +373,7 @@ echo "Vérification des index BWA..." # A ne faire qu'une fois !!
 ##bwa index /storage/biodatabanks/ucsc/genomes/hg19/Homo_sapiens-hg19_2012-9-19/fasta/all.fasta
 #bwa index /home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa
 #bwa index /home/plstenge/genomes/Melanogrammus_aeglefinus_OLKM01.fasta
-#bwa index /home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fast
+#bwa index /home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fasta
 
 ################################################################################
 # FONCTION POUR CALCULER LE TAUX DE MAPPING
