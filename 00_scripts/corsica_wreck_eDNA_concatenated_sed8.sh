@@ -358,13 +358,24 @@ echo -e "Sample\tSpecies\tType\tTotalReads\tMappedReads\tMappingRate" > "${MAPPI
 # DÉFINITION DES GÉNOMES DE RÉFÉRENCE (TAXONS MODIFIÉS)
 ################################################################################
 declare -A TAXONS=(
-  ["Vitis_vinifera"]="29760:/storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa"
-  ["Homo_sapiens"]="9606:/home/plstenge/genomes/Homo_sapiens/GCF_000001405.40_GRCh38.p14_genomic.fna"
-  ["Mus_musculus"]="10090:/home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa"
-  ["Melanogrammus_aeglefinus"]="8056:/home/plstenge/genomes/Melanogrammus_aeglefinus_OLKM01.fasta"
-  ["Gobiusculus_flavescens"]="257540:/home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fasta"
-  ["Cannabis_sativa"]="3483:/home/plstenge/genomes/Cannabis_sativa/GCF_029168945.1_ASM2916894v1_genomic.fna"
-  ["Canis_lupus_familiaris"]="9615:/home/plstenge/genomes/Canis_lupus_familiaris/GCF_011100685.1_UU_Cfam_GSD_1.0_genomic.fna"
+ # ["Vitis_vinifera"]="29760:/storage/groups/gdec/shared_paleo/genomes_REF/12Xv2_grapevine_genome_assembly.fa"
+ # ["Homo_sapiens"]="9606:/home/plstenge/genomes/Homo_sapiens/GCF_000001405.40_GRCh38.p14_genomic.fna"
+  ["Mus_musculus"]="10088:/home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa"
+ # ["Melanogrammus_aeglefinus"]="8056:/home/plstenge/genomes/Melanogrammus_aeglefinus_OLKM01.fasta"
+ # ["Gobiusculus_flavescens"]="257540:/home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fasta"
+ # ["Cannabis_sativa"]="3483:/home/plstenge/genomes/Cannabis_sativa/GCF_029168945.1_ASM2916894v1_genomic.fna"
+ # ["Canis_lupus_familiaris"]="9615:/home/plstenge/genomes/Canis_lupus_familiaris/GCF_011100685.1_UU_Cfam_GSD_1.0_genomic.fna"
+  ["Bertholletia_excelsa"]="3644:/home/plstenge/genomes/Bertholletia_excelsa/GCA_039639745.1_Bnut_1.0_genomic.fna"
+  ["Brassica_oleracea"]="3705:/home/plstenge/genomes/Brassica_oleracea/GCF_000695525.1_BOL_genomic.fna"
+  ["Calluna_vulgaris"]="13384:/home/plstenge/genomes/Calluna_vulgaris/GCA_964145215.1_ddCalVulg4.hap2.1_genomic.fna"
+  ["Eragrostis_tef"]="38413:/home/plstenge/genomes/Eragrostis_tef/GCA_000970635.1_ASM97063v1_genomic.fna"
+  ["Malus_domestica"]="3749:/home/plstenge/genomes/Malus_domestica/GCF_042453785.1_GDT2T_hap1_genomic.fna"
+  ["Musa_acuminata"]="4640:/home/plstenge/genomes/Musa_acuminata/GCF_036884655.1_Cavendish_Baxijiao_AAA_genomic.fna"
+  ["Oryza_sativa"]="4527:/home/plstenge/genomes/Oryza_sativa/GCF_034140825.1_ASM3414082v1_genomic.fna"
+  ["Canis_lupus"]="9611:/home/plstenge/genomes/Canis_lupus/GCA_905319855.2_mCanLor1.2_genomic.fna"
+  ["Rattus_norvegicus"]="9611:/home/plstenge/genomes/Rattus_norvegicus/GCF_036323735.1_GRCr8_genomic.fna"
+  ["Ochotona_curzoniae"]="9977:/home/plstenge/genomes/Ochotona_curzoniae/GCF_017591425.1_NIBS_Ocur_1.0_genomic.fna"
+  ["Sus_scrofa"]="9822:/home/plstenge/genomes/Sus_scrofa/GCF_000003025.6_Sscrofa11.1_genomic.fna"
 )
 
 ################################################################################
@@ -376,9 +387,20 @@ echo "Vérification des index BWA..." # A ne faire qu'une fois !!
 #bwa index /home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa
 #bwa index /home/plstenge/genomes/Melanogrammus_aeglefinus_OLKM01.fasta
 #bwa index /home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fasta
-bwa index /home/plstenge/genomes/Cannabis_sativa/GCF_029168945.1_ASM2916894v1_genomic.fna
-bwa index /home/plstenge/genomes/Homo_sapiens/GCF_000001405.40_GRCh38.p14_genomic.fna
-bwa index /home/plstenge/genomes/Canis_lupus_familiaris/GCF_011100685.1_UU_Cfam_GSD_1.0_genomic.fna
+#bwa index /home/plstenge/genomes/Cannabis_sativa/GCF_029168945.1_ASM2916894v1_genomic.fna
+#bwa index /home/plstenge/genomes/Homo_sapiens/GCF_000001405.40_GRCh38.p14_genomic.fna
+#bwa index /home/plstenge/genomes/Canis_lupus_familiaris/GCF_011100685.1_UU_Cfam_GSD_1.0_genomic.fna
+bwa index /home/plstenge/genomes/Bertholletia_excelsa/GCA_039639745.1_Bnut_1.0_genomic.fna
+bwa index /home/plstenge/genomes/Brassica_oleracea/GCF_000695525.1_BOL_genomic.fna
+bwa index /home/plstenge/genomes/Calluna_vulgaris/GCA_964145215.1_ddCalVulg4.hap2.1_genomic.fna
+bwa index /home/plstenge/genomes/Eragrostis_tef/GCA_000970635.1_ASM97063v1_genomic.fna
+bwa index /home/plstenge/genomes/Malus_domestica/GCF_042453785.1_GDT2T_hap1_genomic.fna
+bwa index /home/plstenge/genomes/Musa_acuminata/GCF_036884655.1_Cavendish_Baxijiao_AAA_genomic.fna
+bwa index /home/plstenge/genomes/Oryza_sativa/GCF_034140825.1_ASM3414082v1_genomic.fna
+bwa index /home/plstenge/genomes/Canis_lupus/GCA_905319855.2_mCanLor1.2_genomic.fna
+bwa index /home/plstenge/genomes/Rattus_norvegicus/GCF_036323735.1_GRCr8_genomic.fna
+bwa index /home/plstenge/genomes/Ochotona_curzoniae/GCF_017591425.1_NIBS_Ocur_1.0_genomic.fna
+bwa index /home/plstenge/genomes/Sus_scrofa/GCF_000003025.6_Sscrofa11.1_genomic.fna
 
 ################################################################################
 # FONCTION POUR CALCULER LE TAUX DE MAPPING
