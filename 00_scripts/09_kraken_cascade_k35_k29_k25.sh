@@ -80,7 +80,7 @@ PROJECT="/home/plstenge/seda_DNA_Corsican_wreck_comparison"
 ANALYSIS="${PROJECT}/09_kraken_cascade_k35_k29_k25"
 
 INPUT_DIR="/storage/groups/gdec/shared_paleo/CapoSagro/fastp"
-KRAKENTOOLS_DIR="${ANALYSIS}/tools/KrakenTools"
+KRAKENTOOLS_DIR="/home/plstenge/coprolites_comparison/08_krakentools/KrakenTools"
 
 DB_K35="/storage/groups/gdec/shared/Kraken_database/k2_core_nt_20250609"
 DB_K29="/storage/groups/gdec/shared/Kraken_database/core_nt_k29"
