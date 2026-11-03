@@ -25,34 +25,7 @@ trap 'printf "ERREUR ligne %s : %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
 PROJECT=/home/plstenge/seda_DNA_Corsican_wreck_comparison
 INPUT_DIR=/storage/groups/gdec/shared_paleo/CapoSagro/fastp
-KRAKEN_RUN="${1:-}"
-
-if [[ -z "$KRAKEN_RUN" ]]; then
-    KRAKEN_RUN="$(
-        python3 - <<'PY'
-from pathlib import Path
-
-root = Path(
-    "/home/plstenge/seda_DNA_Corsican_wreck_comparison/"
-    "09_kraken_cascade_k35_k29_k25/runs"
-)
-
-runs = sorted(
-    (p for p in root.glob("run_*") if (p / "SUCCESS").is_file()),
-    key=lambda p: p.name,
-)
-
-if not runs:
-    raise SystemExit(
-        f"ERREUR : aucun run Kraken terminé avec SUCCESS dans {root}"
-    )
-
-print(runs[-1])
-PY
-    )" || exit 1
-fi
-
-printf 'Run Kraken sélectionné : %s\n' "$KRAKEN_RUN"
+KRAKEN_RUN="${1:-/home/plstenge/seda_DNA_Corsican_wreck_comparison/09_kraken_cascade_k35_k29_k25/runs/run_20261030_162223_9307771}"
 THREADS="${SLURM_CPUS_PER_TASK:-36}"
 SORT_THREADS=4
 SORT_MEM=2G
@@ -64,9 +37,13 @@ SAMPLES=(sed6 sed8)
 PROFILES=(k35 k29 k25 k35_k29_k25)
 RUN_ID="run_$(date +%Y%m%d_%H%M%S)_${SLURM_JOB_ID:-manual_$$}"
 OUT="${PROJECT}/10_mapdamage_cascade/runs/${RUN_ID}"
-[[ -d "$KRAKEN_RUN" && -f "$KRAKEN_RUN/SUCCESS" ]] || {
-    echo 'Run Kraken absent ou sans marqueur SUCCESS.' >&2; exit 1;
+[[ -d "$KRAKEN_RUN/kraken" ]] || {
+    printf 'ERREUR : répertoire Kraken absent : %s\n' \
+        "$KRAKEN_RUN/kraken" >&2
+    exit 1
 }
+
+printf 'Run Kraken utilisé : %s\n' "$KRAKEN_RUN"
 [[ "$MIN_MAPQ" =~ ^[0-9]+$ && "$MIN_MAPQ" -le 255 ]] || exit 1
 [[ "$KEEP_EXTRACTED" == 0 || "$KEEP_EXTRACTED" == 1 ]] || exit 1
 for cmd in python3 bwa samtools mapDamage; do command -v "$cmd" >/dev/null; done
