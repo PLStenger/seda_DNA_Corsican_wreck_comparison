@@ -57,14 +57,14 @@ cat > "$OUT/qc/targets.tsv" <<'TARGETS'
 reference_id\ttaxon\ttaxid\treference_path
 Homo_sapiens\tHomo_sapiens\t9606\t/home/plstenge/genomes/Homo_sapiens/GCF_000001405.40_GRCh38.p14_genomic.fna
 Gobiusculus_flavescens\tGobiusculus_flavescens\t257540\t/home/plstenge/genomes/Gobiusculus_flavescens/Gobiusculus_flavescens_fGobFla1.fasta
-Mus_musculus\tMus_musculus\t10090\t/home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa
+Mus_musculus\tMus_musculus\t10090\t/home/plstenge/genomes/Mus_musculus/Mus_musculus.GRCm39.dna.toplevel.fa
 Rattus_norvegicus\tRattus_norvegicus\t10116\t/home/plstenge/genomes/Rattus_norvegicus/GCF_036323735.1_GRCr8_genomic.fna
 Quercus\tQuercus\t3511\t/home/plstenge/genomes/Quercus_robur/Qrob_PM1N.fa
 Calluna_vulgaris\tCalluna_vulgaris\t13385\t/home/plstenge/genomes/Calluna_vulgaris/GCA_964145215.1_ddCalVulg4.hap2.1_genomic.fna
 Cannabis_sativa\tCannabis_sativa\t3483\t/home/plstenge/genomes/Cannabis_sativa/GCF_029168945.1_ASM2916894v1_genomic.fna
 Canis_lupus_familiaris\tCanis_lupus_familiaris\t9615\t/home/plstenge/genomes/Canis_lupus_familiaris/GCF_011100685.1_UU_Cfam_GSD_1.0_genomic.fna
 Canis_lupus\tCanis_lupus\t9612\t/home/plstenge/genomes/Canis_lupus/GCA_905319855.2_mCanLor1.2_genomic.fna
-Alnus_glutinosa\tAlnus_glutinosa\t3517\t/home/plstenge/genomes/Alnus_glutinosa_genome_assembly_dhAlnGlut1.fa
+Alnus_glutinosa\tAlnus_glutinosa\t3517\t/home/plstenge/genomes/Alnus_glutinosa/Alnus_glutinosa_genome_assembly_dhAlnGlut1.fa
 Bertholletia_excelsa\tBertholletia_excelsa\t3645\t/home/plstenge/genomes/Bertholletia_excelsa/GCA_039639745.1_Bnut_1.0_genomic.fna
 Brassica_oleracea\tBrassica_oleracea\t3712\t/home/plstenge/genomes/Brassica_oleracea/GCF_000695525.1_BOL_genomic.fna
 Eragrostis_tef\tEragrostis_tef\t110835\t/home/plstenge/genomes/Eragrostis_tef/GCA_000970635.1_ASM97063v1_genomic.fna
