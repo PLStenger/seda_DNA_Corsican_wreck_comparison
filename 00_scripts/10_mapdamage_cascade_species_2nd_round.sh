@@ -56,7 +56,7 @@ log "Sortie : $OUT"
 cat > "$OUT/qc/targets.tsv" <<'TARGETS'
 reference_id\ttaxon\ttaxid\treference_path
 Homo_sapiens\tHomo_sapiens\t9606\t/home/plstenge/genomes/Homo_sapiens/GCF_000001405.40_GRCh38.p14_genomic.fna
-Gobiusculus_flavescens\tGobiusculus_flavescens\t257540\t/home/plstenge/genomes/Gobiusculus_flavescens_fGobFla1.fasta
+Gobiusculus_flavescens\tGobiusculus_flavescens\t257540\t/home/plstenge/genomes/Gobiusculus_flavescens/Gobiusculus_flavescens_fGobFla1.fasta
 Mus_musculus\tMus_musculus\t10090\t/home/plstenge/genomes/Mus_musculus.GRCm39.dna.toplevel.fa
 Rattus_norvegicus\tRattus_norvegicus\t10116\t/home/plstenge/genomes/Rattus_norvegicus/GCF_036323735.1_GRCr8_genomic.fna
 Quercus\tQuercus\t3511\t/home/plstenge/genomes/Quercus_robur/Qrob_PM1N.fa
