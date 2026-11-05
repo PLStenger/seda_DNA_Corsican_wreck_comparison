@@ -13,7 +13,7 @@ base_dir <- if (length(args) >= 1L) {
 } else {
   paste0(
     "/home/plstenge/seda_DNA_Corsican_wreck_comparison/",
-    "10_mapdamage_cascade/runs/run_20261103_150905_9459089/results"
+    "10_mapdamage_cascade/runs/run_20261104_173622_9491330/results"
   )
 }
 
