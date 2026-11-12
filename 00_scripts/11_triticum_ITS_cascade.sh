@@ -72,7 +72,12 @@ def load_map(root):
     mapping={r['contig']:r['subgenome'] for r in rows}
     if len(mapping)!=len(rows) or not mapping or any(not k or not v for k,v in mapping.items()):
         raise ValueError('Invalid/duplicate entries in contig_subgenome.tsv')
-    names=(root/'qc/index_contigs.txt').read_text().splitlines()
+    raw_names=(root/'qc/index_contigs.txt').read_text().splitlines()
+    names=[name.split()[0] for name in raw_names if name.strip()]
+    if len(names)!=len(set(names)):
+        raise ValueError(
+            'Duplicate reference identifiers after removing FASTA descriptions'
+        )
     missing=set(names)-set(mapping)
     if missing:
         raise ValueError('Unmapped index contigs: '+', '.join(sorted(missing))+
