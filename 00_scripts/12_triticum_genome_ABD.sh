@@ -19,7 +19,7 @@ PROJECT=${PROJECT:-/home/plstenge/seda_DNA_Corsican_wreck_comparison}
 REF=${REF:-/home/plstenge/genomes/Triticum_aestivum/GCF_018294505.1_IWGSC_CS_RefSeq_v2.1_genomic.fna}
 INPUT_RUN=${1:?Usage: sbatch 12_triticum_genome_ABD.sh /home/plstenge/seda_DNA_Corsican_wreck_comparison/11_triticum_ITS_cascade/runs/run_20261112_115451_9952692}
 THREADS=${THREADS:-${SLURM_CPUS_PER_TASK:-36}}
-MIN_MAPQ=${MIN_MAPQ:-25}
+MIN_MAPQ=${MIN_MAPQ:-20}
 WINDOW=${WINDOW:-1000000}
 read -r -a SAMPLES <<< "${SAMPLES_STR:-sed6 sed8}"
 read -r -a PROFILES <<< "${PROFILES_STR:-k35_k29_k25}"
