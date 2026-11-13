@@ -8,7 +8,17 @@
 #SBATCH --error=triticum_ITS2_%j.err
 # Usage: bash 13_triticum_ITS2_ASV.sh ASVs.fasta [abundances.tsv]
 # Activate an environment containing blastn, makeblastdb, bowtie2-inspect, python3.
+# Initialisation de Conda, comme dans le script shotgun.
+set -Eeo pipefail
+
+module load conda/4.12.0
+source ~/.bashrc
+conda activate "${CONDA_ENV:-mapdamage_py39}"
+
 set -Eeuo pipefail
+
+echo "CONDA_DEFAULT_ENV=${CONDA_DEFAULT_ENV:-non_defini}"
+echo "CONDA_PREFIX=${CONDA_PREFIX:-non_defini}"
 export LC_ALL=C
 trap 'printf "ERROR line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 ASVS=${1:?Usage: script ASVs.fasta [abundances.tsv]}
