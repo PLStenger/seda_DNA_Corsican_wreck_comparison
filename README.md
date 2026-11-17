@@ -30,3 +30,5 @@ https://github.com/ZimmermannHH/BeringSea_shotgun_sequencing/
       /home/plstenge/seda_DNA_Corsican_wreck_comparison/11_triticum_ITS_cascade/runs/run_20261112_115451_9952692
 
     sbatch 13_triticum_ITS2_ASV.sh triticum_ITS2_6_ASVs.fasta table_ASV_Triticum.tsv
+
+    sbatch --export=ALL,MODE=run,CONDA_ENV=/home/plstenge/miniconda3/envs/triticum_pca_mamba 13_triticum_PCA_k35_k29_k25.sh
